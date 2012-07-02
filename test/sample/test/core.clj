@@ -54,7 +54,7 @@
   (is (= (take 10 (core/sample (range 20) :seed 7 :replace true))
          '(16 4 5 4 0 14 8 9 10 14)))
   (is (= (reservoir/sample (range 20) 10 :seed 7)
-         [13 1 14 4 16 3 7 5 17 15]))
+         [14 7 2 5 17 6 0 16 1 19]))
   (is (= (reservoir/sample (range 20) 10 :seed 7 :replace true)
          [8 19 11 16 19 0 10 18 9 6]))
   (is (= (stream/sample (range 20) 10 20 :seed 7)
