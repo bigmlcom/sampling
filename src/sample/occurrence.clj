@@ -11,7 +11,7 @@
   (:require (sample [random :as random])))
 
 (def default-probability-cutoff
-  "The cumulative-probabilities fn will stop calculating occurance
+  "The cumulative-probabilities fn will stop calculating occurrence
    probabilities when they drop below this threshold."
   1E-10)
 
