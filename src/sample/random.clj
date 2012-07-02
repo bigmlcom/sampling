@@ -11,7 +11,8 @@
 
 (defn ^Random create
   "Creates a random number generator.  Returns a Random when a seed is
-   given, or nil when no seed is given."
+   given, or nil (signifying an unseeded generator) when no seed is
+   given."
   [& [seed]]
   (when seed (Random. seed)))
 
