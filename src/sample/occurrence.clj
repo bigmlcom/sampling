@@ -10,6 +10,11 @@
    replacement."
   (:require (sample [random :as random])))
 
+(def default-probability-cutoff
+  "The cumulative-probabilities fn will stop calculating occurance
+   probabilities when they drop below this threshold."
+  1E-10)
+
 (defn- choose [a b]
   (/ (reduce * (map double (range (- (inc a) b) (inc a))))
      (reduce * (map double (range 1 (inc b))))))
@@ -26,13 +31,18 @@
                                      #(> sample-prob (random/next-double! rnd)))))))
 
 (defn cumulative-probabilities
-  "Returns a list of cumulative probabilities in order of occurrence."
-  [sample-size pop-size]
-  (concat (take-while
-           (partial > 0.99999999999)
-           (reductions + (map (partial occurrence-prob sample-size pop-size)
-                              (range))))
-          [1.0]))
+  "Returns a list of cumulative probabilities in order of
+   occurrence. The list will stop when the occurrence probability
+   drops below the optional prob-cutoff (default 1E-10)."
+  [sample-size pop-size & [prob-cutoff]]
+  (let [prob-cutoff (or prob-cutoff default-probability-cutoff)]
+    (concat (take-while
+             ;; Stop calculating occurance probabilities once the
+             ;; liklihood becomes smaller than the cutoff
+             (partial > (- 1 prob-cutoff))
+             (reductions + (map (partial occurrence-prob sample-size pop-size)
+                                (range))))
+            [1.0])))
 
 (defn roll
   "Roll the number of occurrences for an item given sample size,
