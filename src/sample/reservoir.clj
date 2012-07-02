@@ -51,7 +51,8 @@
        :indices indices
        :seed (random/next-seed! rnd)})))
 
-(defn foo [reservoir val]
+(defmethod insert ::without-replacement [reservoir val]
+  [reservoir val]
   (let [{:keys [reservoir-size insert-count seed indices]} (meta reservoir)
         insert-count (inc insert-count)
         rnd (random/create seed)
@@ -67,10 +68,6 @@
       {:reservoir-size reservoir-size
        :insert-count insert-count
        :seed (random/next-seed! rnd)})))
-
-(defmethod insert ::without-replacement [reservoir val]
-  [reservoir val]
-  (foo reservoir val))
 
 (defn sample
   "Returns a reservoir sample (a vector of items) for a collection
