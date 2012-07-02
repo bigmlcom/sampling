@@ -10,12 +10,7 @@
    can. Final reservoirs are in random order."
   (:require (sample [core :as core]
                     [random :as random]
-                    stream)))
-
-;; These are references to private fns.  What I really want is package
-;; level visibility, but as far as I know that doesn't exist in
-;; Clojure.
-(def ^:private roll-occurances #'sample.stream/roll-occurances)
+                    [occurrence :as occurrence])))
 
 (defn create
   "Creates a sample reservoir given the reservoir size.
@@ -41,14 +36,14 @@
   (let [{:keys [reservoir-size insert-count seed indices]} (meta reservoir)
         insert-count (inc insert-count)
         rnd (random/create seed)
-        occurances (roll-occurances reservoir-size
-                                    insert-count
-                                    (random/next-seed! rnd))]
+        occurrences (occurrence/roll reservoir-size
+                                     insert-count
+                                     (random/next-seed! rnd))]
     (with-meta (if (empty? reservoir)
-                 (vec (repeat occurances val))
+                 (vec (repeat occurrences val))
                  (reduce #(assoc %1 %2 val)
                          reservoir
-                         (take occurances
+                         (take occurrences
                                (core/sample indices :seed (random/next-seed! rnd)))))
       {:reservoir-size reservoir-size
        :insert-count insert-count
