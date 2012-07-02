@@ -20,10 +20,12 @@
      (reduce * (map double (range 1 (inc k))))))
 
 (defn- choose-exact [n k]
-  (cond (zero? k) 1N
-        (zero? n) 0N
-        :else (* (/ n k)
-                 (choose-exact (dec n) (dec k)))))
+  (if (> k n)
+    0N
+    (reduce + (take-last 2 (reductions (fn [r d]
+                                         (/ (* r (- n d)) d))
+                                       1N
+                                       (range 1N (inc k)))))))
 
 (defn- choose [n k]
   (let [result (double (choose-fast n k))]
@@ -50,8 +52,6 @@
   [sample-size pop-size & [prob-cutoff]]
   (let [prob-cutoff (or prob-cutoff default-probability-cutoff)]
     (concat (take-while
-             ;; Stop calculating occurance probabilities once the
-             ;; liklihood becomes smaller than the cutoff
              (partial > (- 1 prob-cutoff))
              (reductions + (map (partial occurrence-prob sample-size pop-size)
                                 (range))))
