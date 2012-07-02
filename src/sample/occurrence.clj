@@ -15,9 +15,22 @@
    probabilities when they drop below this threshold."
   1E-10)
 
-(defn- choose [a b]
-  (/ (reduce * (map double (range (- (inc a) b) (inc a))))
-     (reduce * (map double (range 1 (inc b))))))
+(defn- choose-fast [n k]
+  (/ (reduce * (map double (range (- (inc n) k) (inc n))))
+     (reduce * (map double (range 1 (inc k))))))
+
+(defn- choose-exact [n k]
+  (cond (zero? k) 1N
+        (zero? n) 0N
+        :else (* (/ n k)
+                 (choose-exact (dec n) (dec k)))))
+
+(defn- choose [n k]
+  (let [result (double (choose-fast n k))]
+    (if (or (.isInfinite result)
+            (.isNaN result))
+      (choose-exact n k)
+      result)))
 
 (defn- occurrence-prob [sample-size pop-size occurrences]
   (let [select-prob (/ 1.0 pop-size)]
