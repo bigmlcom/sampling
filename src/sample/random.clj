@@ -14,11 +14,11 @@
    given, or nil (signifying an unseeded generator) when no seed is
    given."
   [& [seed]]
-  (when seed (Random. seed)))
+  {:generator (when seed (Random. seed))})
 
 (defn next-seed!
   "Returns a new seed given a random number generator, or nil when the
-   generator is nil (unseeded)."
+   generator is unseeded."
   [^Random rnd]
   (when rnd (.nextLong rnd)))
 
