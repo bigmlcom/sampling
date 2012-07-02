@@ -3,6 +3,7 @@
 
 ;; Author: Adam Ashenfelter <ashenfad@bigml.com>
 ;; Start date: Jun 22, 2012
+
 (ns sample.reservoir
   "Provides random sampling using reservoirs. This is useful when the
    original population can't be kept in memory but the sample set
@@ -14,8 +15,6 @@
 ;; These are references to private fns.  What I really want is package
 ;; level visibility, but as far as I know that doesn't exist in
 ;; Clojure.
-(def ^:private replace? #'sample.core/replace?)
-(def ^:private seed #'sample.core/seed)
 (def ^:private roll-occurances #'sample.stream/roll-occurances)
 
 (defn create
@@ -24,11 +23,11 @@
    Options:
     :replace - True to sample with replacement, defaults to false.
     :seed - A seed for the random number generator, defaults to nil."
-  [reservoir-size & opts]
+  [reservoir-size & {:keys [seed replace]}]
   (with-meta [] {:reservoir-size reservoir-size
                  :insert-count 0
-                 :seed (seed opts)
-                 :indices (when (replace? opts)
+                 :seed seed
+                 :indices (when replace
                             (vec (range reservoir-size)))}))
 
 (defmulti insert

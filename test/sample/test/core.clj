@@ -1,4 +1,4 @@
-;; Copyright (c) 2011, 2012 BigML, Inc
+;; Copyright (c) 2012 BigML, Inc
 ;; All rights reserved.
 
 ;; Author: Adam Ashenfelter <ashenfad@bigml.com>

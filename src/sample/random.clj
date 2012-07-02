@@ -3,6 +3,7 @@
 
 ;; Author: Adam Ashenfelter <ashenfad@bigml.com>
 ;; Start date: Jun 21, 2012
+
 (ns sample.random
   "Fns for creating and using a random number generator. Seeding is
    optional."

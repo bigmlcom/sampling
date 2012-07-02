@@ -3,17 +3,12 @@
 
 ;; Author: Adam Ashenfelter <ashenfad@bigml.com>
 ;; Start date: Jun 21, 2012
+
 (ns sample.core
   "Provides simple random sampling. The original population is kept in
    memory but the resulting sample set is produced as a lazy
    sequence."
   (:require (sample [random :as random])))
-
-(defn- replace? [opts]
-  (true? (:replace (apply hash-map opts) false)))
-
-(defn- seed [opts]
-  (:seed (apply hash-map opts)))
 
 (defn- with-replacement [coll rnd]
   (when-not (empty? coll)
@@ -37,7 +32,8 @@
   [coll & opts]
   (if-not (vector? coll)
     (apply sample (vec coll) opts)
-    (let [sample-fn (if (replace? opts)
+    (let [{:keys [seed replace]} opts
+          sample-fn (if replace
                       with-replacement
                       without-replacement)]
-      (sample-fn coll (random/create (seed opts))))))
+      (sample-fn coll (random/create seed)))))

@@ -10,15 +10,6 @@
   (:require (sample [random :as random]
                     core)))
 
-;; These are references to private fns.  What I really want is package
-;; level visibility, but as far as I know that doesn't exist in
-;; Clojure.
-(def ^:private replace? #'sample.core/replace?)
-(def ^:private seed #'sample.core/seed)
-
-(defn- approximate? [opts]
-  (true? (:approximate (apply hash-map opts) false)))
-
 (defn- choose [a b]
   (/ (reduce * (map double (range (- (inc a) b) (inc a))))
      (reduce * (map double (range 1 (inc b))))))
@@ -93,8 +84,8 @@
     :approximate - When true, the sample size will be near, but not
                    exactly, the requested size. This is only for
                    sampling with replacement, the default is false."
-  [coll sample-size pop-size & opts]
-  (let [sample-fn (cond (not (replace? opts)) without-replacement
-                        (approximate? opts) with-replacement-approx
+  [coll sample-size pop-size & {:keys [seed replace approximate]}]
+  (let [sample-fn (cond (not replace) without-replacement
+                        approximate with-replacement-approx
                         :else with-replacement)]
-    (sample-fn coll sample-size pop-size (random/create (seed opts)))))
+    (sample-fn coll sample-size pop-size (random/create seed))))
