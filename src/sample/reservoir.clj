@@ -29,10 +29,10 @@
   "Inserts a value into the sample reservoir (a vector of items)."
   (fn [reservoir _]
     (if (:indices (meta reservoir))
-      :with-replacement
-      :without-replacement)))
+      ::with-replacement
+      ::without-replacement)))
 
-(defmethod insert :with-replacement [reservoir val]
+(defmethod insert ::with-replacement [reservoir val]
   (let [{:keys [reservoir-size insert-count seed indices]} (meta reservoir)
         insert-count (inc insert-count)
         rnd (random/create seed)
@@ -50,7 +50,7 @@
        :indices indices
        :seed (random/next-seed! rnd)})))
 
-(defmethod insert :without-replacement [reservoir val]
+(defmethod insert ::without-replacement [reservoir val]
   [reservoir val]
   (let [{:keys [reservoir-size insert-count seed indices]} (meta reservoir)
         insert-count (inc insert-count)
