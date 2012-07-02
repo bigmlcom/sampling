@@ -14,7 +14,7 @@
    given, or nil (signifying an unseeded generator) when no seed is
    given."
   [& [seed]]
-  {:generator (when seed (Random. seed))})
+  (when seed (Random. seed)))
 
 (defn next-seed!
   "Returns a new seed given a random number generator, or nil when the
