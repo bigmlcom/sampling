@@ -13,7 +13,8 @@
                     [occurrence :as occurrence])))
 
 (defn create
-  "Creates a sample reservoir given the reservoir size.
+  "Creates a sample reservoir given the reservoir size. The reservoir
+   is initialized as an empty vector.
 
    Options:
     :replace - True to sample with replacement, defaults to false.
