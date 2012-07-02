@@ -2,7 +2,7 @@
 ;; All rights reserved.
 
 ;; Author: Adam Ashenfelter <ashenfad@bigml.com>
-;; Start date: Jun 21, 2012
+;; Start date: Jul 2, 2012
 
 (ns sample.occurrence
   "Provides functions for computing the number of occurrences to be
