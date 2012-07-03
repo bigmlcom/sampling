@@ -15,24 +15,33 @@
    probabilities when they drop below this threshold."
   1E-10)
 
-(defn- choose-fast [n k]
+(defn choose-fast
+  "Fast but approximate and unsafe calculation for n choose k."
+  [n k]
   (/ (reduce * (map double (range (- (inc n) k) (inc n))))
      (reduce * (map double (range 1 (inc k))))))
 
-(defn- choose-exact [n k]
-  (if (> k n)
-    0N
-    (reduce + (take-last 2 (reductions (fn [r d]
-                                         (/ (* r (- n d)) d))
-                                       1N
-                                       (range 1N (inc k)))))))
+(defn- choose-exact* [n k acc]
+  (cond (zero? k) (/ acc)
+        (zero? n) 0N
+        :else (recur (dec n) (dec k) (* acc (/ k n)))))
 
-(defn- choose [n k]
-  (let [result (double (choose-fast n k))]
-    (if (or (.isInfinite result)
-            (.isNaN result))
-      (choose-exact n k)
-      result)))
+(defn choose-exact
+  "Safe and exact but slow calculation for n choose k."
+  [n k]
+  (choose-exact* n k 1N))
+
+(defn choose
+  "Calculates n choose k. Attemps a fast approximate calculation with
+  an exact calculation as a fail over."
+  [n k]
+  (if (>= n k)
+    (let [result (double (choose-fast n k))]
+      (if (or (.isInfinite result)
+              (.isNaN result))
+        (choose-exact n k)
+        result))
+    0))
 
 (defn- occurrence-prob [sample-size pop-size occurrences]
   (let [select-prob (/ 1.0 pop-size)]
