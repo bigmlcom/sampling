@@ -15,11 +15,11 @@
    probabilities when they drop below this threshold."
   1E-10)
 
-(defn choose-fast
+(defn ^Double choose-fast
   "Fast but approximate and unsafe calculation for n choose k."
   [n k]
-  (/ (reduce * (map double (range (- (inc n) k) (inc n))))
-     (reduce * (map double (range 1 (inc k))))))
+  (/ (reduce * 1.0 (range (- (inc n) k) (inc n)))
+     (reduce * 1.0 (range 1 (inc k)))))
 
 (defn- choose-exact* [n k acc]
   (cond (zero? k) (/ acc)
@@ -36,7 +36,7 @@
   an exact calculation as a fail over."
   [n k]
   (if (>= n k)
-    (let [result (double (choose-fast n k))]
+    (let [result (choose-fast n k)]
       (if (or (.isInfinite result)
               (.isNaN result))
         (choose-exact n k)
