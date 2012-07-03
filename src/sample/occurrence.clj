@@ -22,9 +22,9 @@
      (reduce * 1.0 (range 1 (inc k)))))
 
 (defn- choose-exact* [n k acc]
-  (cond (zero? k) (/ acc)
+  (cond (zero? k) acc
         (zero? n) 0N
-        :else (recur (dec n) (dec k) (* acc (/ k n)))))
+        :else (recur (dec n) (dec k) (* acc (/ n k)))))
 
 (defn choose-exact
   "Safe and exact but slow calculation for n choose k."
