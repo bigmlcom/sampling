@@ -10,34 +10,29 @@
   (:import (java.util Random)))
 
 (defn ^Random create
-  "Creates a random number generator.  Returns a Random when a seed is
-   given, or nil (signifying an unseeded generator) when no seed is
-   given."
-  [& [seed]]
-  (when seed (Random. seed)))
+  "Creates a random number generator with an optional seed"
+  [& [^long seed]]
+  (if seed (Random. seed) (Random.)))
 
 (defn next-seed!
-  "Returns a new seed given a random number generator, or nil when the
-   generator is unseeded."
+  "Returns a new seed given a random number generator."
   [^Random rnd]
-  (when rnd (.nextLong rnd)))
+  (.nextLong rnd))
 
 (defn next-int!
   "Returns an integer given a random number generator and a range."
-  [^Random rnd range]
-  (if rnd (.nextInt rnd range) (rand-int range)))
+  [^Random rnd ^long range]
+  (.nextInt rnd range))
 
 (defn next-double!
   "Returns a double given a random number generator."
   [^Random rnd]
-  (if rnd (.nextDouble rnd) (rand)))
+  (.nextDouble rnd))
 
 (defn shuffle!
   "Shuffles a collection given a random number generator.  Adapted
    from the clojure.core/shuffle."
   [^java.util.Collection coll ^Random rnd]
-  (if rnd
-    (let [al (java.util.ArrayList. coll)]
-      (java.util.Collections/shuffle al rnd)
-      (clojure.lang.RT/vector (.toArray al)))
-    (shuffle coll)))
+  (let [al (java.util.ArrayList. coll)]
+    (java.util.Collections/shuffle al rnd)
+    (clojure.lang.RT/vector (.toArray al))))
