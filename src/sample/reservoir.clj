@@ -22,7 +22,7 @@
   [reservoir-size & {:keys [seed replace]}]
   (with-meta [] {:reservoir-size reservoir-size
                  :insert-count 0
-                 :seed (if seed seed (random/next-seed! (random/create)))
+                 :seed (or seed (random/next-seed! (random/create)))
                  :indices (when replace
                             (vec (range reservoir-size)))}))
 
