@@ -8,6 +8,7 @@
   "Provides functions for computing the number of occurrences to be
    expected for an item in a population when sampled with
    replacement."
+  (:import (cern.jet.math.tdouble DoubleArithmetic))
   (:require (sample [random :as random])))
 
 (def default-probability-cutoff
@@ -18,8 +19,7 @@
 (defn ^Double choose-fast
   "Fast but approximate and unsafe calculation for n choose k."
   [n k]
-  (/ (reduce * 1.0 (range (- (inc n) k) (inc n)))
-     (reduce * 1.0 (range 1 (inc k)))))
+  (DoubleArithmetic/binomial (double n) (long k)))
 
 (defn- choose-exact* [n k acc]
   (cond (zero? k) acc
