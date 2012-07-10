@@ -124,7 +124,7 @@ then you can set `:approximate` to true for much faster performance:
 
 ```clojure
 test> (time (count (stream/sample (range 10000) 5000 10000 :replace true)))
-"Elapsed time: 2481.228 msecs"
+"Elapsed time: 374.021 msecs"
 5000
 test> (time (count (stream/sample (range 10000) 5000 10000
                                   :replace true :approximate true)))
