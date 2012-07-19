@@ -10,9 +10,10 @@
   (:import (java.util Random)))
 
 (defn ^Random create
-  "Creates a random number generator with an optional seed"
-  [& [^long seed]]
-  (if seed (Random. seed) (Random.)))
+  "Creates a random number generator with an optional seed. Any
+   hashable value is valid as a seed."
+  ([] (create (rand)))
+  ([seed] (Random. (hash seed))))
 
 (defn next-seed!
   "Returns a new seed given a random number generator."
