@@ -12,10 +12,8 @@
 (defn ^Random create
   "Creates a random number generator with an optional seed. Any
    hashable value is valid as a seed."
-  [& [seed]]
-  (if seed
-    (Random. (hash seed))
-    (create (rand))))
+  ([] (create (rand)))
+  ([seed] (Random. (hash seed))))
 
 (defn next-seed!
   "Returns a new seed given a random number generator."
