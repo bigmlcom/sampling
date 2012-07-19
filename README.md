@@ -2,8 +2,9 @@
 # Random Sampling in Clojure
 ============================
 
-This library supports three flavors of random sampling. As we review
-each, feel free to follow along in the REPL:
+This library supports three flavors of random sampling: simple
+sampling, reservoir sampling, and stream sampling. As we review each,
+feel free to follow along in the REPL:
 
 ```clojure
 user> (ns test
@@ -56,6 +57,13 @@ test> (core/sample (range 5) :seed 7)
 (1 3 2 0 4)
 ```
 
+Any value that's hashable is valid as a seed:
+
+```clojure
+test> (core/sample (range 5) :seed :foo)
+(2 1 3 0 4)
+```
+
 ## Reservoir Sampling
 
 `sample.reservoir` provides functions for [reservoir sampling]
@@ -70,7 +78,7 @@ values through the reservoir. For example:
 
 ```clojure
 test> (reductions reservoir/insert (reservoir/create 3) (range 10))
-([] [0] [0 1] [1 2 0] [1 2 3] [1 2 3] [1 2 5] [6 2 5] [6 2 5] [6 2 8] [6 2 8])
+([] [0] [0 1] [0 1 2] [0 1 3] [4 1 3] [4 1 3] [4 1 6] [4 1 7] [4 1 7] [4 1 9])
 ```
 
 For convenience, `reservoir/sample` accepts a collection and a
@@ -86,13 +94,13 @@ and `:seed` parameters.
 
 ```clojure
 test> (reservoir/sample (range 10) 5 :replace true :seed 3)
-[7 3 7 4 2]
+[2 5 3 3 8]
 ```
 
 ## Stream Sampling
 
 `sample.stream` is useful when taking a large sample from a large
-population. Neither the original population or the resulting sample is
+population. Neither the original population or the resulting sample are
 kept in memory. There are a couple of caveats. First, unlike the other
 sampling techniques, the resulting sample stream is not in random
 order. It will be in the order of the original population. So if you
@@ -114,7 +122,7 @@ supported by `stream/sample`:
 
 ```clojure
 test> (stream/sample (range 10) 5 10 :replace true :seed 3)
-(2 3 3 8 9)
+(2 3 4 5 7)
 ```
 
 It's computationally expensive to select the exact number of desired
