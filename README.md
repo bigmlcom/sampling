@@ -164,7 +164,10 @@ test> (apply map concat (map stream-sampler (range 5)))
 ((0 2 4) (1 2 3) (1 2 4))
 ```
 
-If only one sample sequence is required, then `stream/sample` provides a convenient wrapper for `stream/create`.  `stream/sample` accepts a collection, the desired samples, and the population size and returns a lazy sequence of samples.
+If only one sample sequence is required, then `stream/sample` provides
+a convenient wrapper for `stream/create`.  `stream/sample` accepts a
+collection, the desired samples, and the population size and returns a
+lazy sequence of samples.
 
 ```clojure
 test> (stream/sample (range) 5 10)
