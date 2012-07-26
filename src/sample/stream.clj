@@ -13,8 +13,9 @@
 
 (defn- approximate-distribution [sample-size pop-size]
   (apply sorted-map
-         (mapcat list (occurrence/cumulative-probabilities sample-size
-                                                           pop-size)
+         (mapcat list
+                 (occurrence/cumulative-probabilities sample-size
+                                                      pop-size)
                  (range))))
 
 (defn- with-replacement-approx [val dist rnd]
