@@ -117,22 +117,40 @@ As an example, we can take two samples from a population of four
 values:
 
 ```clojure
-test> (def stream-sampler (stream/create 2 4))
-test> (stream-sampler 0)
+test> (def sampler! (stream/create 2 4))
+test> (sampler! 0)
 (0)
-test> (stream-sampler 1)
+test> (sampler! 1)
 ()
-test> (stream-sampler 2)
+test> (sampler! 2)
 (2)
-test> (stream-sampler 3)
+test> (sampler! 3)
 nil
 ```
 
-To get the samples as a lazy seq, simply use `mapcat`:
+The returned list can contain multiple values when sampling with
+replacement:
+
+```clojure
+test> (def sampler! (stream/create 4 4 :replace true))
+test> (sampler! 0)
+(0 0)
+test> (sampler! 1)
+(1)
+test> (sampler! 2)
+()
+test> (sampler! 3)
+(3)
+```
+
+To get the samples as a lazy seq, simply use `mapcat`, or the
+convenience method `stream/sample` (more details later):
 
 ```clojure
 test> (mapcat (stream/create 2 4) (range 4))
 (0 3)
+test> (stream/sample (range 4) 2 4)
+(1 3)
 ```
 
 As with the other sampling techniques, `stream/create` supports
@@ -147,20 +165,20 @@ test> (mapcat (stream/create 7 10 :replace true :seed 5) (range 10))
 a single pass over the original population:
 
 ```clojure
-test> (def stream-sampler (juxt (stream/create 3 5 :seed 1)
-                                (stream/create 3 5 :seed 2)
-                                (stream/create 3 5 :seed 3)))
-test> (map stream-sampler (range 5))
+test> (def sampler! (juxt (stream/create 3 5 :seed 1)
+                          (stream/create 3 5 :seed 2)
+                          (stream/create 3 5 :seed 3)))
+test> (map sampler! (range 5))
 ([(0) () ()] [() (1) (1)] [(2) (2) (2)] [() (3) ()] [(4) nil (4)])
 ```
 
 To make it more clear, we can combine the results into three seqs:
 
 ```clojure
-test> (def stream-sampler (juxt (stream/create 3 5 :seed 1)
-                                (stream/create 3 5 :seed 2)
-                                (stream/create 3 5 :seed 3)))
-test> (apply map concat (map stream-sampler (range 5)))
+test> (def sampler! (juxt (stream/create 3 5 :seed 1)
+                          (stream/create 3 5 :seed 2)
+                          (stream/create 3 5 :seed 3)))
+test> (apply map concat (map sampler! (range 5)))
 ((0 2 4) (1 2 3) (1 2 4))
 ```
 

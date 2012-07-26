@@ -36,8 +36,10 @@
 
 (defn create
   "Creates a fn that accepts a single value and returns a list
-   containing 0 or more samples of the value.  Returns nil when
-   sampling is finished.
+   containing 0 or more samples of the value (> 1 samples are possible
+   when sampling with replacement).  The fn includes side effects.
+   Each call will alter its internal state and change the results of
+   future calls.
 
    Options:
     :replace - True to sample with replacement, defaults to false.
