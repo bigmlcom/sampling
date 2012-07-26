@@ -108,21 +108,22 @@ need a random ordering, you'll want to shuffle the sample. The second
 caveat is that, unlike reservoir sampling, the size of the population
 must be declared up-front.
 
-To use stream sampling call `stream/sample` with a collection (the
-population), the desired number of samples, and the size of the
-population. The result is a lazy sequence of samples:
+To use stream sampling, call `stream/sample` with the population, the
+desired number of samples, and the size of the population.  The result
+is a lazy sequence of samples.
+
+As an example, we take five samples from a population of ten values:
 
 ```clojure
-test> (stream/sample (range 10) 5 10)
+test> (stream/sample (range) 5 10)
 (1 2 4 7 9)
 ```
 
-As with the other sampling techniques, both `:replace` and `:seed` are
-supported by `stream/sample`:
+As elsewhere, `stream/sample` supports `:replace` and `:seed`:
 
 ```clojure
-test> (stream/sample (range 10) 5 10 :replace true :seed 3)
-(2 3 4 5 7)
+test> (stream/sample (range) 5 10 :replace true :seed 2)
+(2 3 6 7 7)
 ```
 
 It's computationally expensive to select the exact number of desired
@@ -138,4 +139,62 @@ test> (time (count (stream/sample (range 10000) 5000 10000
                                   :replace true :approximate true)))
 "Elapsed time: 33.923 msecs"
 4954
+```
+
+`:approximate` is also useful if you want to sample the population at
+a particular rate rather than collect a specific sample size.
+
+To illustrate, when `stream/sample` is given an infinite list of
+values as the population, the default behavior is to take the
+requested samples from the expected population.  In this case, it
+means taking exactly one sample from the first thousand values of the
+population:
+
+```clojure
+test> (stream/sample (range) 1 1000)
+(229)
+```
+
+However, when `:approximate` is true the resulting sample is also
+infinite, with each item sampled at a probability of `1/1000`:
+
+```clojure
+test> (take 10 (stream/sample (range) 1 1000 :approximate true))
+(1149 1391 1562 3960 4359 4455 5141 5885 6310 7568 7828)
+```
+
+The `stream/multi-sample` fn can be used to generate multiple
+samplings in one pass over the population.  The fn takes the
+population followed by sets of sampling parameters, one for each
+desired sampling.
+
+The result is a list of lists for each value in the population,
+corresponding to the number of times each sampling selects a
+particular item from the popoulation.
+
+As an example, we'll create two samplings from one population. The
+first sampling will select 3 items from 5 with no replacement.  The
+second selects 5 from 5 with replacement.
+
+```clojure
+test> (stream/multi-sample (range)
+                           [3 5 :seed 7]
+                           [5 5 :replace true :seed 13])
+([(0) (0 0)]
+ [() ()]
+ [(2) ()]
+ [(3) (3)]
+ [nil (4 4)])
+```
+
+To see the result more clearly, we can concatenate the individual
+samples for each sampling:
+
+```clojure
+test> (apply map
+             concat
+             (stream/multi-sample (range)
+                                  [3 5 :seed 7]
+                                  [5 5 :replace true :seed 13]))
+((0 2 3) (0 0 3 4 4))
 ```
