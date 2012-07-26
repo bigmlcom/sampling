@@ -46,11 +46,7 @@
   (is (about-eq (reduce + (stream/sample (range 1000) 500 1000
                                          :replace true
                                          :approximate true))
-                250000 35000))
-  (is (= (stream/sample (range 100) 5 10 :seed 7)
-         (mapcat (stream/create 5 10 :seed 7) (range 100))))
-  (is (= (stream/sample (range 100) 5 10 :seed 7 :approximate true)
-         (mapcat (stream/create 5 10 :seed 7 :approximate true) (range 100)))))
+                250000 35000)))
 
 (deftest regression
   (is (= (take 10 (core/sample (range 20) :seed :foo))
@@ -64,8 +60,12 @@
   (is (= (reservoir/sample (range 20) 10 :seed 7 :replace true)
          [13 10 9 16 7 2 15 17 4 14]))
   (is (= (stream/sample (range 20) 10 20 :seed 7)
-         '(2 3 4 5 9 12 13 16 17 19)))
+         '(3 4 5 7 10 12 14 15 16 17)))
   (is (= (stream/sample (range 20) 10 20 :seed 7 :replace true)
-         '(2 3 6 6 6 11 14 15 17 19)))
+         '(2 3 7 8 12 13 13 14 17 19)))
   (is (= (stream/sample (range 20) 10 20 :seed 7 :replace true :approximate true)
-         '(0 3 4 5 5 6 6 8 11 12 13 13 17))))
+         '(0 1 3 4 7 9 9 10 11 16 19)))
+  (is (= (apply map concat (stream/multi-sample (range)
+                                                [3 5 :seed 7]
+                                                [5 5 :replace true :seed 13]))
+         '((0 2 3) (0 0 3 4 4)))))

@@ -33,30 +33,16 @@
   (when (and (pos? sample-size) (pos? pop-size))
     (if (> sample-size (random/next-int! rnd pop-size))
       (list val)
-      (list))))
+      '())))
 
-(defn create
-  "Creates a fn that accepts a single value and returns a list
-   containing 0 or more samples of the value (> 1 samples are possible
-   when sampling with replacement).  The fn includes side effects.
-   Each call will alter its internal state and change the results of
-   future calls.
-
-   Options:
-    :replace - True to sample with replacement, defaults to false.
-    :seed - A seed for the random number generator, defaults to nil.
-    :approximate - When true, the sample size will be near, but not
-                   exactly, the requested size. This is only for
-                   sampling with replacement, the default is false."
-  [sample-size pop-size & {:keys [seed replace approximate]}]
+(defn- create [sample-size pop-size & {:keys [seed replace approximate]}]
   (let [state (atom {:sample-size sample-size
                      :pop-size pop-size
-                     :seed (or seed (rand))})
+                     :rnd (random/create (or seed (rand)))})
         dist (when (and replace approximate)
                (approximate-distribution sample-size pop-size))]
     (fn [val]
-      (let [{:keys [sample-size pop-size seed]} @state
-            rnd (random/create seed)
+      (let [{:keys [sample-size pop-size rnd]} @state
             sample (cond (and replace approximate)
                          (with-replacement-approx val dist rnd)
                          replace
@@ -64,8 +50,7 @@
                          :else
                          (without-replacement val sample-size pop-size rnd))]
         (swap! state merge
-               {:seed (random/next-seed! rnd)
-                :pop-size (if approximate pop-size (dec pop-size))
+               {:pop-size (if approximate pop-size (dec pop-size))
                 :sample-size (if approximate
                                sample-size
                                (- sample-size (count sample)))})
@@ -74,7 +59,7 @@
 (defn sample
   "Returns a lazy sequence of samples from the collection.  The size
    of the desired sample and the size of the input collection must be
-   known ahead of time.  tTe sample will be in order of the input,
+   known ahead of time.  The sample will be in order of the input,
    but this means neither the input stream or the sample need to be
    kept in memory.
 
@@ -89,3 +74,20 @@
          (take-while identity
                      (map (apply create sample-size pop-size opts)
                           coll))))
+
+(defn multi-sample
+  "Creates a lazy seq of samples over coll. Each item in the seq contains
+   a vector of lists, each list representing a sampling for one of the
+   sample streams defined in 'opts-list'. See the readme for more info.
+
+   Each set of sample parameters should be a list composed of the
+   sample size, the population size, and optionally the ':replace',
+   ':seed', and ':approximate' parameters.  See the documentation for
+   'sample' for more about the parameters.
+
+   Example: (multi-sample (range) [3 10] [8 10 :seed 3 :replace true])"
+  [coll & opts-list]
+  (when (seq opts-list)
+    (take-while #(some identity %)
+                (map (apply juxt (map #(apply create %) opts-list))
+                     coll))))

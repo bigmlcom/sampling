@@ -108,91 +108,18 @@ need a random ordering, you'll want to shuffle the sample. The second
 caveat is that, unlike reservoir sampling, the size of the population
 must be declared up-front.
 
-To use stream sampling, call `stream/create` with the desired number
-of samples and the size of the population.  The result is a function
-that accepts a single value and returns a list with that value sampled
-zero or more times (or nil if sampling is finished).
+To use stream sampling, call `stream/sample` with the population, the
+desired number of samples, and the size of the population.  The result
+is a lazy sequence of samples.
 
-As an example, we can take two samples from a population of four
-values:
-
-```clojure
-test> (def sampler! (stream/create 2 4))
-test> (sampler! 0)
-(0)
-test> (sampler! 1)
-()
-test> (sampler! 2)
-(2)
-test> (sampler! 3)
-nil
-```
-
-The returned list can contain multiple values when sampling with
-replacement:
-
-```clojure
-test> (def sampler! (stream/create 4 4 :replace true))
-test> (sampler! 0)
-(0 0)
-test> (sampler! 1)
-(1)
-test> (sampler! 2)
-()
-test> (sampler! 3)
-(3)
-```
-
-To get the samples as a lazy seq, simply use `mapcat`, or the
-convenience method `stream/sample` (more details later):
-
-```clojure
-test> (mapcat (stream/create 2 4) (range 4))
-(0 3)
-test> (stream/sample (range 4) 2 4)
-(1 3)
-```
-
-As with the other sampling techniques, `stream/create` supports
-`:replace` and `:seed`.
-
-```clojure
-test> (mapcat (stream/create 7 10 :replace true :seed 5) (range 10))
-(0 1 3 3 6 7 9)
-```
-
-`stream/create` can be used to produce independent sample streams from
-a single pass over the original population:
-
-```clojure
-test> (def sampler! (juxt (stream/create 3 5 :seed 1)
-                          (stream/create 3 5 :seed 2)
-                          (stream/create 3 5 :seed 3)))
-test> (map sampler! (range 5))
-([(0) () ()] [() (1) (1)] [(2) (2) (2)] [() (3) ()] [(4) nil (4)])
-```
-
-To make it more clear, we can combine the results into three seqs:
-
-```clojure
-test> (def sampler! (juxt (stream/create 3 5 :seed 1)
-                          (stream/create 3 5 :seed 2)
-                          (stream/create 3 5 :seed 3)))
-test> (apply map concat (map sampler! (range 5)))
-((0 2 4) (1 2 3) (1 2 4))
-```
-
-If only one sample sequence is required, then `stream/sample` provides
-a convenient wrapper for `stream/create`.  `stream/sample` accepts a
-collection, the desired samples, and the population size and returns a
-lazy sequence of samples.
+As an example, we take five samples from a population of ten values:
 
 ```clojure
 test> (stream/sample (range) 5 10)
 (1 2 4 7 9)
 ```
 
-As expected, it supports `:replace` and `:seed`:
+As elsewhere, `stream/sample` supports `:replace` and `:seed`:
 
 ```clojure
 test> (stream/sample (range) 5 10 :replace true :seed 2)
@@ -220,7 +147,7 @@ a particular rate rather than collect a specific sample size.
 To illustrate, when `stream/sample` is given an infinite list of
 values as the population, the default behavior is to take the
 requested samples from the expected population.  In this case, it
-means taking a single sample from the first thousand values of the
+means taking exactly one sample from the first thousand values of the
 population:
 
 ```clojure
@@ -229,9 +156,45 @@ test> (stream/sample (range) 1 1000)
 ```
 
 However, when `:approximate` is true the resulting sample is also
-infinite.  But sampled at a *rate* of `1/1000`:
+infinite, with each item sampled at a probability of `1/1000`:
 
 ```clojure
 test> (take 10 (stream/sample (range) 1 1000 :approximate true))
 (1149 1391 1562 3960 4359 4455 5141 5885 6310 7568 7828)
+```
+
+The `stream/multi-sample` fn can be used to generate multiple
+samplings in one pass over the population.  The fn takes the
+population followed by sets of sampling parameters, one for each
+desired sampling.
+
+The result is a list of lists for each value in the population,
+corresponding to the number of times each sampling selects a
+particular item from the popoulation.
+
+As an example, we'll create two samplings from one population. The
+first sampling will select 3 items from 5 with no replacement.  The
+second selects 5 from 5 with replacement.
+
+```clojure
+test> (stream/multi-sample (range)
+                           [3 5 :seed 7]
+                           [5 5 :replace true :seed 13])
+([(0) (0 0)]
+ [() ()]
+ [(2) ()]
+ [(3) (3)]
+ [nil (4 4)])
+```
+
+To see the result more clearly, we can concatenate the individual
+samples for each sampling:
+
+```clojure
+test> (apply map
+             concat
+             (stream/multi-sample (range)
+                                  [3 5 :seed 7]
+                                  [5 5 :replace true :seed 13]))
+((0 2 3) (0 0 3 4 4))
 ```
