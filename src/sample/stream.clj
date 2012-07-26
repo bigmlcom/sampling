@@ -11,38 +11,62 @@
   (:require (sample [random :as random]
                     [occurrence :as occurrence])))
 
-(defn- sample-with-distribution [coll dist rnd]
-  (mapcat (fn [val]
-            (take (second (first (subseq dist >= (random/next-double! rnd))))
-                  (repeat val)))
-          coll))
+(defn- approximate-distribution [sample-size pop-size]
+  (apply sorted-map
+         (mapcat list (occurrence/cumulative-probabilities sample-size
+                                                           pop-size)
+                 (range))))
 
-(defn- with-replacement-approx [coll sample-size pop-size rnd]
-  (sample-with-distribution (take pop-size coll)
-    (apply sorted-map
-           (mapcat list (occurrence/cumulative-probabilities sample-size pop-size)
-                   (range)))
-    rnd))
+(defn- with-replacement-approx [val dist rnd]
+  (repeat (second (first (subseq dist >= (random/next-double! rnd))))
+          val))
 
-(defn- with-replacement [coll sample-size pop-size rnd]
-  (lazy-seq
-   (when (and (pos? sample-size) (pos? pop-size))
-     (let [occurrences (occurrence/roll sample-size
-                                       pop-size
-                                       (random/next-seed! rnd))]
-       (concat (repeat occurrences (first coll))
-               (with-replacement (next coll)
-                 (- sample-size occurrences)
-                 (dec pop-size)
-                 rnd))))))
+(defn- with-replacement [val sample-size pop-size rnd]
+  (when (and (pos? sample-size) (pos? pop-size))
+    (repeat (occurrence/roll sample-size
+                             pop-size
+                             (random/next-seed! rnd))
+            val)))
 
-(defn- without-replacement [coll sample-size pop-size rnd]
-  (lazy-seq
-   (when (and (pos? sample-size) (pos? pop-size))
-     (if (> sample-size (random/next-int! rnd pop-size))
-       (cons (first coll)
-             (without-replacement (next coll) (dec sample-size) (dec pop-size) rnd))
-       (without-replacement (next coll) sample-size (dec pop-size) rnd)))))
+(defn- without-replacement [val sample-size pop-size rnd]
+  (when (and (pos? sample-size) (pos? pop-size))
+    (if (> sample-size (random/next-int! rnd pop-size))
+      (list val)
+      (list))))
+
+(defn create
+  "Creates a fn that accepts a single value and returns a list
+   containing 0 or more samples of the value.  Returns nil when
+   sampling is finished.
+
+   Options:
+    :replace - True to sample with replacement, defaults to false.
+    :seed - A seed for the random number generator, defaults to nil.
+    :approximate - When true, the sample size will be near, but not
+                   exactly, the requested size. This is only for
+                   sampling with replacement, the default is false."
+  [sample-size pop-size & {:keys [seed replace approximate]}]
+  (let [state (atom {:sample-size sample-size
+                     :pop-size pop-size
+                     :seed (or seed (rand))})
+        dist (when (and replace approximate)
+               (approximate-distribution sample-size pop-size))]
+    (fn [val]
+      (let [{:keys [sample-size pop-size seed]} @state
+            rnd (random/create seed)
+            sample (cond (and replace approximate)
+                         (with-replacement-approx val dist rnd)
+                         replace
+                         (with-replacement val sample-size pop-size rnd)
+                         :else
+                         (without-replacement val sample-size pop-size rnd))]
+        (swap! state merge
+               {:seed (random/next-seed! rnd)
+                :pop-size (if approximate pop-size (dec pop-size))
+                :sample-size (if approximate
+                               sample-size
+                               (- sample-size (count sample)))})
+        sample))))
 
 (defn sample
   "Returns a lazy sequence of samples from the collection.  The size
@@ -57,8 +81,8 @@
     :approximate - When true, the sample size will be near, but not
                    exactly, the requested size. This is only for
                    sampling with replacement, the default is false."
-  [coll sample-size pop-size & {:keys [seed replace approximate]}]
-  (let [sample-fn (cond (not replace) without-replacement
-                        approximate with-replacement-approx
-                        :else with-replacement)]
-    (sample-fn coll sample-size pop-size (random/create seed))))
+  [coll sample-size pop-size & opts]
+  (apply concat
+         (take-while identity
+                     (map (apply create sample-size pop-size opts)
+                          coll))))
