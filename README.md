@@ -177,7 +177,7 @@ desired sampling.
 
 Each set of sample parameters should be composed of a consumer fn, the
 sample size, the population size, and optionally the parameters
-':replace', ':seed', and ':rate'.
+`:replace`, `:seed`, and `:rate`.
 
 multi-sample! will generate a unique sampling for every parameter set.
 Whenever a value is sampled, it will be consumed by the parameter
