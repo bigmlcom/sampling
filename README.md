@@ -168,9 +168,9 @@ test> (take 10 (stream/sample (range) 1 1000 :rate true))
 (1149 1391 1562 3960 4359 4455 5141 5885 6310 7568 7828)
 ```
 
-### Multi-Sample
+### Multi-Sampling
 
-The `stream/multi-sample` fn can be used to generate multiple
+The `stream/multi-sample!` fn can be used to generate multiple
 samplings in one pass over the population.  The fn takes the
 population followed by sets of sampling parameters, one for each
 desired sampling.
@@ -179,9 +179,10 @@ Each set of sample parameters should be composed of a consumer fn, the
 sample size, the population size, and optionally the parameters
 `:replace`, `:seed`, and `:rate`.
 
-multi-sample! will generate a unique sampling for every parameter set.
-Whenever a value is sampled, it will be consumed by the parameter
-set's consumer fn.  A consumer fn should accept a single parameter.
+`multi-sample!` will generate a unique sampling for every parameter
+set.  Whenever a value is sampled, it will be consumed by the
+parameter set's consumer fn.  A consumer fn should accept a single
+parameter.
 
 As an example, let's imagine we're running a retail store and want to
 distribute awards to the stream of customers entering the store.  To
@@ -195,9 +196,9 @@ test> (defn award-gift-certificate! [customer-id]
 test> (defn award-hawaiian-vacation! [customer-id]
         (println "Customer" customer-id "wins a Hawaiian vacation."))
 test> (def customer-ids (range 1000))
-test> (stream/multi-sample customer-ids
-                           [award-gift-certificate! 1 100 :rate true]
-                           [award-hawaiian-vacation! 1 500 :rate true])
+test> (stream/multi-sample! customer-ids
+                            [award-gift-certificate! 1 100 :rate true]
+                            [award-hawaiian-vacation! 1 500 :rate true])
 Customer 161 wins a Hawaiian vacation.
 Customer 427 wins a gift certificate.
 Customer 627 wins a gift certificate.
