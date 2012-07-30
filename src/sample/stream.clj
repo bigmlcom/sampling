@@ -11,14 +11,14 @@
   (:require (sample [random :as random]
                     [occurrence :as occurrence])))
 
-(defn- approximate-distribution [sample-size pop-size]
+(defn- rate-distribution [sample-size pop-size]
   (apply sorted-map
          (mapcat list
                  (occurrence/cumulative-probabilities sample-size
                                                       pop-size)
                  (range))))
 
-(defn- with-replacement-approx [val dist rnd]
+(defn- with-replacement-rate [val dist rnd]
   (repeat (second (first (subseq dist >= (random/next-double! rnd))))
           val))
 
@@ -35,23 +35,23 @@
       (list val)
       '())))
 
-(defn- create [sample-size pop-size & {:keys [seed replace approximate]}]
+(defn- create [sample-size pop-size & {:keys [seed replace rate]}]
   (let [state (atom {:sample-size sample-size
                      :pop-size pop-size
                      :rnd (random/create (or seed (rand)))})
-        dist (when (and replace approximate)
-               (approximate-distribution sample-size pop-size))]
+        dist (when (and replace rate)
+               (rate-distribution sample-size pop-size))]
     (fn [val]
       (let [{:keys [sample-size pop-size rnd]} @state
-            sample (cond (and replace approximate)
-                         (with-replacement-approx val dist rnd)
+            sample (cond (and replace rate)
+                         (with-replacement-rate val dist rnd)
                          replace
                          (with-replacement val sample-size pop-size rnd)
                          :else
                          (without-replacement val sample-size pop-size rnd))]
         (swap! state merge
-               {:pop-size (if approximate pop-size (dec pop-size))
-                :sample-size (if approximate
+               {:pop-size (if rate pop-size (dec pop-size))
+                :sample-size (if rate
                                sample-size
                                (- sample-size (count sample)))})
         sample))))
@@ -66,28 +66,44 @@
    Options:
     :replace - True to sample with replacement, defaults to false.
     :seed - A seed for the random number generator, defaults to nil.
-    :approximate - When true, the sample size will be near, but not
-                   exactly, the requested size. This is only for
-                   sampling with replacement, the default is false."
+    :rate - When false, the sample result will be sample-size chosen
+            from population-size.  When true, each item in the
+            population is independently sampled according to the
+            probability sample-size / population-size.  Default is
+            false."
   [coll sample-size pop-size & opts]
   (apply concat
          (take-while identity
                      (map (apply create sample-size pop-size opts)
                           coll))))
 
-(defn multi-sample
-  "Creates a lazy seq of samples over coll. Each item in the seq contains
-   a vector of lists, each list representing a sampling for one of the
-   sample streams defined in 'opts-list'. See the readme for more info.
+(defn multi-sample!
+  "multi-sample! expects a collection followed by one or more sets of
+   sample parameters, each defining a unique sampling of the
+   population.
 
-   Each set of sample parameters should be a list composed of the
+   Each set of sample parameters should be composed of a consumer fn,
    sample size, the population size, and optionally the ':replace',
-   ':seed', and ':approximate' parameters.  See the documentation for
+   ':seed', and ':rate' parameters.  See the documentation for
    'sample' for more about the parameters.
 
-   Example: (multi-sample (range) [3 10] [8 10 :seed 3 :replace true])"
+   multi-sample! will create a unique set of samples for every
+   parameter set.  Whenever a value is sampled, it will be consumed by
+   the parameter set's consumer fn.  A consumer fn should accept a
+   single parameter.
+
+   Example: (multi-sample (range) [#(println :foo %) 2 5]
+                                  [#(println :bar %) 4 5 :replace true])"
   [coll & opts-list]
   (when (seq opts-list)
-    (take-while #(some identity %)
-                (map (apply juxt (map #(apply create %) opts-list))
-                     coll))))
+    (let [consumers (map first opts-list)
+          stream (take-while #(some identity %)
+                             (map (apply juxt (map #(apply create %)
+                                                   (map next opts-list)))
+                                  coll))]
+      (doseq [samples stream]
+        (doall (map (fn [consumer vals]
+                      (doseq [v vals]
+                        (consumer v)))
+                    consumers
+                    samples))))))
