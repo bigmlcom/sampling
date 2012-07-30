@@ -168,9 +168,9 @@ test> (take 10 (stream/sample (range) 1 1000 :rate true))
 (1149 1391 1562 3960 4359 4455 5141 5885 6310 7568 7828)
 ```
 
-### Multi-Sampling
+### Multi-Sample
 
-The `stream/multi-sample!` fn can be used to generate multiple
+The `stream/multi-sample` fn can be used to generate multiple
 samplings in one pass over the population.  The fn takes the
 population followed by sets of sampling parameters, one for each
 desired sampling.
@@ -179,7 +179,7 @@ Each set of sample parameters should be composed of a consumer fn, the
 sample size, the population size, and optionally the parameters
 `:replace`, `:seed`, and `:rate`.
 
-`multi-sample!` will generate a unique sampling for every parameter
+`multi-sample` will generate a unique sampling for every parameter
 set.  Whenever a value is sampled, it will be consumed by the
 parameter set's consumer fn.  A consumer fn should accept a single
 parameter.
@@ -196,9 +196,9 @@ test> (defn award-gift-certificate! [customer-id]
 test> (defn award-hawaiian-vacation! [customer-id]
         (println "Customer" customer-id "wins a Hawaiian vacation."))
 test> (def customer-ids (range 1000))
-test> (stream/multi-sample! customer-ids
-                            [award-gift-certificate! 1 100 :rate true]
-                            [award-hawaiian-vacation! 1 500 :rate true])
+test> (stream/multi-sample customer-ids
+                           [award-gift-certificate! 1 100 :rate true]
+                           [award-hawaiian-vacation! 1 500 :rate true])
 Customer 161 wins a Hawaiian vacation.
 Customer 427 wins a gift certificate.
 Customer 627 wins a gift certificate.
@@ -210,4 +210,23 @@ Customer 786 wins a gift certificate.
 Customer 794 wins a gift certificate.
 Customer 833 wins a Hawaiian vacation.
 Customer 836 wins a gift certificate.
+```
+
+### Multi-Reduce
+
+`multi-reduce` is very similar to `multi-sample`, except every set of
+sample parameters defines a sampling along with a reduction function.
+So each set of sample parameters should be composed of a reduce fn, an
+initial reduce value, the sample size, the population size, and
+optionally the `:replace`, `:seed`, and `:rate` parameters.
+
+`multi-reduce` will return a seq of values, each value being the final
+reduction for a sampling.  A reducer fn should accept two parameters.
+
+An example:
+
+```clojure
+test> (stream/multi-reduce (range) [+ 0 20 30 :seed 3]
+                                   [+ 0 20 30 :seed 4])
+(269 291)
 ```

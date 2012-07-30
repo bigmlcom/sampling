@@ -77,8 +77,13 @@
                      (map (apply create sample-size pop-size opts)
                           coll))))
 
-(defn multi-sample!
-  "multi-sample! expects a collection followed by one or more sets of
+(defn- multi-stream [coll opts-list]
+  (take-while #(some identity %)
+              (map (apply juxt (map #(apply create %) opts-list))
+                   coll)))
+
+(defn multi-sample
+  "multi-sample expects a collection followed by one or more sets of
    sample parameters, each defining a unique sampling of the
    population.
 
@@ -87,7 +92,7 @@
    ':seed', and ':rate' parameters.  See the documentation for
    'sample' for more about the parameters.
 
-   multi-sample! will create a unique set of samples for every
+   multi-sample will create a unique set of samples for every
    parameter set.  Whenever a value is sampled, it will be consumed by
    the parameter set's consumer fn.  A consumer fn should accept a
    single parameter.
@@ -96,14 +101,30 @@
                                   [#(println :bar %) 4 5 :replace true])"
   [coll & opts-list]
   (when (seq opts-list)
-    (let [consumers (map first opts-list)
-          stream (take-while #(some identity %)
-                             (map (apply juxt (map #(apply create %)
-                                                   (map next opts-list)))
-                                  coll))]
-      (doseq [samples stream]
-        (doall (map (fn [consumer vals]
-                      (doseq [v vals]
-                        (consumer v)))
-                    consumers
-                    samples))))))
+    (let [consumers (map first opts-list)]
+      (doseq [samples (multi-stream coll (map next opts-list))]
+        (dorun (map (comp dorun map) consumers samples))))))
+
+(defn multi-reduce
+  "multi-reduce expects a collection followed by one or more sets of
+   sample parameters, each defining a unique sampling of the
+   population.
+
+   Each set of sample parameters should be composed of a reduce fn, an
+   initial reduce value, the sample size, the population size, and
+   optionally the ':replace', ':seed', and ':rate' parameters.  See
+   the documentation for 'sample' for more about the parameters.
+
+   multi-reduce will create a reduction over the unique set of samples
+   for every parameter set.  Whenever a value is sampled, it will be
+   reduced by the parameter set's reducer fn.  A reducer fn should
+   accept two parameters.
+
+   Example: (multi-reduce (range) [+ 0 2 5]
+                                  [- 100 4 5 :replace true])"
+  [coll & opts-list]
+  (when (seq opts-list)
+    (let [reducers (map first opts-list)]
+      (reduce #(doall (map reduce reducers %1 %2))
+              (map second opts-list)
+              (multi-stream coll (map #(drop 2 %) opts-list))))))
