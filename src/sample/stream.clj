@@ -38,7 +38,7 @@
 (defn- create [sample-size pop-size & {:keys [seed replace rate]}]
   (let [state (atom {:sample-size sample-size
                      :pop-size pop-size
-                     :rnd (random/create (or seed (rand)))})
+                     :rnd (random/create seed)})
         dist (when (and replace rate)
                (rate-distribution sample-size pop-size))]
     (fn [val]

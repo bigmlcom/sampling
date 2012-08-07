@@ -13,7 +13,7 @@
   "Creates a random number generator with an optional seed. Any
    hashable value is valid as a seed."
   ([] (create (rand)))
-  ([seed] (Random. (hash seed))))
+  ([seed] (Random. (hash (or seed (rand))))))
 
 (defn next-seed!
   "Returns a new seed given a random number generator."
