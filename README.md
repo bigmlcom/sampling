@@ -151,11 +151,12 @@ calculated only once and then applied to each item in the population
 independently.  As an example:
 
 ```clojure
-test> (time (count (stream/sample (range 10000) 5000 10000 :replace true)))
+test> (time (count (stream/sample (range 10000) 5000 10000
+                                  :replace true)))
 "Elapsed time: 374.021 msecs"
 5000
 test> (time (count (stream/sample (range 10000) 5000 10000
-                                  :replace true :approximate true)))
+                                  :replace true :rate true)))
 "Elapsed time: 33.923 msecs"
 4954
 ```
