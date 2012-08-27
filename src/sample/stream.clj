@@ -35,7 +35,7 @@
       (list val)
       '())))
 
-(defn- create [sample-size pop-size & {:keys [seed replace rate]}]
+(defn- create [sample-size pop-size & {:keys [seed replace rate oob]}]
   (let [state (atom {:sample-size sample-size
                      :pop-size pop-size
                      :rnd (random/create seed)})
@@ -54,7 +54,9 @@
                 :sample-size (if rate
                                sample-size
                                (- sample-size (count sample)))})
-        sample))))
+        (if (and oob (pos? pop-size))
+          (if (empty? sample) (list val) '())
+          sample)))))
 
 (defn sample
   "Returns a lazy sequence of samples from the collection.  The size
@@ -70,7 +72,8 @@
             from population-size.  When true, each item in the
             population is independently sampled according to the
             probability sample-size / population-size.  Default is
-            false."
+            false.
+    :oob - Returns the out-of-bag items.  Default is false."
   [coll sample-size pop-size & opts]
   (apply concat
          (take-while identity
