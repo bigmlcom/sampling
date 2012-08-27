@@ -22,15 +22,17 @@
 (deftest regression
   (is (= (stream/sample (range) 10 20 :seed 7)
          '(3 4 5 7 10 12 14 15 16 17)))
-  (is (= (stream/sample (range) 10 20 :seed 7 :oob true)
+  (is (= (stream/sample (range) 10 20 :seed 7 :out-of-bag true)
          '(0 1 2 6 8 9 11 13 18 19)))
   (is (= (stream/sample (range) 10 20 :seed 7 :replace true)
          '(2 3 7 8 12 13 13 14 17 19)))
-  (is (= (stream/sample (range) 10 20 :seed 7 :replace true :oob true)
+  (is (= (stream/sample (range) 10 20 :seed 7 :replace true :out-of-bag true)
          '(0 1 4 5 6 9 10 11 15 16 18)))
   (is (= (stream/sample (range 20) 10 20 :seed 7 :replace true :rate true)
          '(0 1 3 4 7 9 9 10 11 16 19)))
-  (is (= (stream/sample (range 20) 10 20 :seed 7 :replace true :rate true :oob true)
+  (is (= (stream/sample (range 20) 10 20
+                        :seed 7 :replace true
+                        :rate true :out-of-bag true)
          '(2 5 6 8 12 13 14 15 17 18)))
   (let [sum1 (atom 0)
         sum2 (atom 0)]

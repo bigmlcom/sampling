@@ -129,14 +129,14 @@ test> (stream/sample (range) 5 10 :replace true :seed 2)
 ### Out-of-bag Items
 
 If an item isn't selected as part of a sampling, it's called
-*out-of-bag*.  Setting the `:oob` parameter to true will return a
-sequence of the out-of-bag items instead of the sampled items.  This
+*out-of-bag*.  Setting the `:out-of-bag` parameter to true will return
+a sequence of the out-of-bag items instead of the sampled items.  This
 can be useful when paired with `:seed`.
 
 ```clojure
 test> (stream/sample (range) 7 10 :seed 0)
 (0 2 3 5 6 7 9)
-test> (stream/sample (range) 7 10 :seed 0 :oob true)
+test> (stream/sample (range) 7 10 :seed 0 :out-of-bag true)
 (1 4 8)
 ```
 

@@ -35,7 +35,7 @@
       (list val)
       '())))
 
-(defn- create [sample-size pop-size & {:keys [seed replace rate oob]}]
+(defn- create [sample-size pop-size & {:keys [seed replace rate out-of-bag]}]
   (let [state (atom {:sample-size sample-size
                      :pop-size pop-size
                      :rnd (random/create seed)})
@@ -54,7 +54,7 @@
                 :sample-size (if rate
                                sample-size
                                (- sample-size (count sample)))})
-        (if (and oob (pos? pop-size))
+        (if (and out-of-bag (pos? pop-size))
           (if (empty? sample) (list val) '())
           sample)))))
 
@@ -73,7 +73,7 @@
             population is independently sampled according to the
             probability sample-size / population-size.  Default is
             false.
-    :oob - Returns the out-of-bag items.  Default is false."
+    :out-of-bag - Returns the out-of-bag items.  Default is false."
   [coll sample-size pop-size & opts]
   (apply concat
          (take-while identity
