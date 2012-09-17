@@ -7,7 +7,8 @@
 (ns sample.test.core
   (:use clojure.test
         sample.test.util)
-  (:require (sample [core :as core])))
+  (:require (sample [core :as core]
+                    [random :as random])))
 
 (deftest sample
   (is (about-eq (reduce + (take 500 (core/sample (range 1000))))
@@ -24,3 +25,14 @@
          '(16 13 17 12 9 4 18 7 14 19)))
   (is (= (take 10 (core/sample (range 20) :seed 7 :replace true))
          '(16 4 5 4 0 14 8 9 10 14))))
+
+(defn- make-weighted-data [& {:keys [seed]}]
+  (let [rnd (random/create seed)]
+    (map list (range) (repeatedly #(Math/abs (.nextGaussian rnd))))))
+
+(deftest weighted-regression
+  (let [data (take 10 (make-weighted-data :seed :foo))]
+    (= (core/weighted-sample data :seed :bar)
+       '(7 0 1 9 8 3 6 4 2 5))
+    (= (take 10 (core/weighted-sample data :seed :bar :replace true))
+       '(7 0 8 0 0 0 0 9 4 9))))

@@ -21,14 +21,16 @@
   (.nextLong rnd))
 
 (defn next-int!
-  "Returns an integer given a random number generator and a range."
-  [^Random rnd ^long range]
-  (.nextInt rnd range))
+  "Returns an integer given a random number generator and an optional
+  range."
+  ([^Random rnd] (.nextInt rnd))
+  ([^Random rnd ^long range] (.nextInt rnd range)))
 
 (defn next-double!
-  "Returns a double given a random number generator."
-  [^Random rnd]
-  (.nextDouble rnd))
+  "Returns a double given a random number generator and an optional
+   range."
+  ([^Random rnd] (.nextDouble rnd))
+  ([^Random rnd range] (* range (.nextDouble rnd))))
 
 (defn shuffle!
   "Shuffles a collection given a random number generator.  Adapted

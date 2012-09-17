@@ -64,6 +64,39 @@ test> (core/sample (range 5) :seed :foo)
 (2 1 3 0 4)
 ```
 
+### Weighted Simple Sampling
+
+`weighted-sample` produces a sequence of samples from a collection of
+tuples.  The first value in the tuple should be the candidate item for
+sampling, the second value should be the item's weight.  As above,
+both `:seed` and `:replace` are supported.  For example:
+
+```clojure
+test> (take 5 (core/weighted-sample [[:heads 0.5] [:tails 0.5]]
+                                    :replace true
+                                    :seed 123))
+(:heads :heads :tails :heads :tails)
+```
+
+Or equivalently:
+
+```clojure
+test> (take 5 (core/weighted-sample {:heads 0.5 :tails 0.5}
+                                    :replace true
+                                    :seed 123))
+(:tails :heads :heads :heads :tails)
+```
+
+The weights need not sum to 1.
+
+```clojure
+test> (frequencies (take 1000 (core/weighted-sample {:rock 3
+                                                     :paper 2
+                                                     :scissors 1}
+                                                    :replace true)))
+{:rock 509, :paper 304, :scissors 187}
+```
+
 ## Reservoir Sampling
 
 `sample.reservoir` provides functions for [reservoir sampling]
