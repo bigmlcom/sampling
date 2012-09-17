@@ -39,17 +39,17 @@
         rnd (random/create seed)
         occurrences (occurrence/roll reservoir-size
                                      insert-count
-                                     (random/next-seed! rnd))]
+                                     (random/next-long! rnd))]
     (with-meta (if (empty? reservoir)
                  (vec (repeat occurrences val))
                  (reduce #(assoc %1 %2 val)
                          reservoir
                          (take occurrences
-                               (core/sample indices :seed (random/next-seed! rnd)))))
+                               (core/sample indices :seed (random/next-long! rnd)))))
       {:reservoir-size reservoir-size
        :insert-count insert-count
        :indices indices
-       :seed (random/next-seed! rnd)})))
+       :seed (random/next-long! rnd)})))
 
 (defmethod insert ::without-replacement [reservoir val]
   [reservoir val]
@@ -67,7 +67,7 @@
                      :else reservoir)
       {:reservoir-size reservoir-size
        :insert-count insert-count
-       :seed (random/next-seed! rnd)})))
+       :seed (random/next-long! rnd)})))
 
 (defn sample
   "Returns a reservoir sample (a vector of items) for a collection
