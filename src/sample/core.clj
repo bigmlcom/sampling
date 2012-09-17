@@ -37,3 +37,83 @@
                       with-replacement
                       without-replacement)]
       (sample-fn coll (random/create seed)))))
+
+(def ^:private branch-factor 8)
+
+(defn- make-tree [coll]
+  (if (> (count coll) branch-factor)
+    (let [branch-size (Math/ceil (/ (count coll) branch-factor))
+          children (map make-tree (partition-all branch-size coll))]
+      {:total (reduce + (map :total children))
+       :children children})
+    {:total (reduce + (map second coll))
+     :items coll}))
+
+(declare pop-item)
+
+(defn- process-parent [roll [prev-total result item] child]
+  (let [new-total (+ prev-total (:total child))]
+    (if (and (nil? item)
+             (> new-total roll prev-total))
+      (let [[new-child item] (pop-item child (- roll prev-total))]
+        [(+ prev-total (:total new-child))
+         (if (zero? (:total new-child))
+           result
+           (cons new-child result))
+         item])
+      [new-total (cons child result) item])))
+
+(defn- process-leaf [roll [prev-total result item] candidate-item]
+  (let [[val weight] candidate-item
+        new-total (+ prev-total weight)]
+    (if (and (nil? item)
+             (> new-total roll prev-total))
+      [prev-total result val]
+      [new-total (cons candidate-item result) item])))
+
+(defn- pop-item [{:keys [total children items]} roll]
+  (if children
+    (let [[new-total new-children item]
+          (reduce (partial process-parent roll) [0] children)]
+      [{:total new-total :children new-children} item])
+    (let [[new-total new-items item]
+          (reduce (partial process-leaf roll) [0] items)]
+      [{:total new-total :items new-items} item])))
+
+(defn- weighted-without-replacement [tree rnd]
+  (when (pos? (:total tree))
+    (let [[new-tree item]
+          (pop-item tree (random/next-double! rnd (:total tree)))]
+      (cons item (lazy-seq (weighted-without-replacement new-tree rnd))))))
+
+(defn- weighted-with-replacement [coll rnd]
+  (let [sm (into (sorted-map)
+                 (next (reductions (fn [[tw] [i w]] [(+ tw w) i])
+                                   [0]
+                                   coll)))
+        total (first (last sm))]
+    (repeatedly
+     #(second (first (subseq sm > (random/next-double! rnd total)))))))
+
+(defn weighted-sample
+  "Returns a lazy sequence of samples from a collection of tuples.
+   Each tuple should contain an item and a sample weight.  For
+   example:
+
+   (weighted-sample [[:heads 0.5] [:tails 0.5]])
+   (weighted-sample {:heads 0.5 :tails 0.5})
+
+   This function constructs a tree to index the items in the
+   population. This initialization takes O(nlogn) where n is the
+   population size. Each sample takes (logn) time.
+
+   Options:
+    :replace - True to sample with replacement, defaults to false.
+    :seed - A seed for the random number generator, defaults to nil."
+  [coll & opts]
+  (let [{:keys [seed replace]} opts
+        rnd (random/create seed)
+        coll (random/shuffle! (seq coll) rnd)]
+    (if replace
+      (weighted-with-replacement coll rnd)
+      (weighted-without-replacement (make-tree coll) rnd))))
