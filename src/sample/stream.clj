@@ -26,7 +26,7 @@
   (when (and (pos? sample-size) (pos? pop-size))
     (repeat (occurrence/roll sample-size
                              pop-size
-                             (random/next-seed! rnd))
+                             (random/next-long! rnd))
             val)))
 
 (defn- without-replacement [val sample-size pop-size rnd]
