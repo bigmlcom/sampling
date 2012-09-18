@@ -24,10 +24,7 @@
 
 (defn- with-replacement [val sample-size pop-size rnd]
   (when (and (pos? sample-size) (pos? pop-size))
-    (repeat (occurrence/roll sample-size
-                             pop-size
-                             (random/next-long! rnd))
-            val)))
+    (repeat (occurrence/roll sample-size pop-size :rnd rnd) val)))
 
 (defn- without-replacement [val sample-size pop-size rnd]
   (when (and (pos? sample-size) (pos? pop-size))
@@ -35,10 +32,11 @@
       (list val)
       '())))
 
-(defn- create [sample-size pop-size & {:keys [seed replace rate out-of-bag]}]
+(defn- create [sample-size pop-size
+               & {:keys [seed generator replace rate out-of-bag]}]
   (let [state (atom {:sample-size sample-size
                      :pop-size pop-size
-                     :rnd (random/create seed)})
+                     :rnd (random/create :seed seed :generator generator)})
         dist (when (and replace rate)
                (rate-distribution sample-size pop-size))]
     (fn [val]
@@ -68,6 +66,9 @@
    Options:
     :replace - True to sample with replacement, defaults to false.
     :seed - A seed for the random number generator, defaults to nil.
+    :generator - The random number generator to be used, options
+                 are :lcg (linear congruential) or :twister (Marsenne
+                 twister), default is :lcg.
     :rate - When false, the sample result will be sample-size chosen
             from population-size.  When true, each item in the
             population is independently sampled according to the
@@ -92,8 +93,8 @@
 
    Each set of sample parameters should be composed of a consumer fn,
    sample size, the population size, and optionally the ':replace',
-   ':seed', and ':rate' parameters.  See the documentation for
-   'sample' for more about the parameters.
+   ':seed', 'generator', and ':rate' parameters.  See the
+   documentation for 'sample' for more about the parameters.
 
    multi-sample will create a unique set of samples for every
    parameter set.  Whenever a value is sampled, it will be consumed by
@@ -115,8 +116,9 @@
 
    Each set of sample parameters should be composed of a reduce fn, an
    initial reduce value, the sample size, the population size, and
-   optionally the ':replace', ':seed', and ':rate' parameters.  See
-   the documentation for 'sample' for more about the parameters.
+   optionally the ':replace', ':seed', 'generator', and ':rate'
+   parameters.  See the documentation for 'sample' for more about the
+   parameters.
 
    multi-reduce will create a reduction over the unique set of samples
    for every parameter set.  Whenever a value is sampled, it will be

@@ -18,11 +18,15 @@
 
    Options:
     :replace - True to sample with replacement, defaults to false.
-    :seed - A seed for the random number generator, defaults to nil."
-  [reservoir-size & {:keys [seed replace]}]
+    :seed - A seed for the random number generator, defaults to nil.
+    :generator - The random number generator to be used, options
+                 are :lcg (linear congruential) or :twister (Marsenne
+                 twister), default is :lcg."
+  [reservoir-size & {:keys [seed replace generator]}]
   (with-meta [] {:reservoir-size reservoir-size
                  :insert-count 0
                  :seed seed
+                 :generator generator
                  :indices (when replace
                             (vec (range reservoir-size)))}))
 
@@ -34,28 +38,34 @@
       ::without-replacement)))
 
 (defmethod insert ::with-replacement [reservoir val]
-  (let [{:keys [reservoir-size insert-count seed indices]} (meta reservoir)
+  (let [{:keys [reservoir-size insert-count seed generator indices]}
+        (meta reservoir)
         insert-count (inc insert-count)
-        rnd (random/create seed)
+        rnd (random/create :seed seed :generator generator)
         occurrences (occurrence/roll reservoir-size
                                      insert-count
-                                     (random/next-long! rnd))]
+                                     :seed (random/next-long! rnd)
+                                     :generator generator)]
     (with-meta (if (empty? reservoir)
                  (vec (repeat occurrences val))
                  (reduce #(assoc %1 %2 val)
                          reservoir
                          (take occurrences
-                               (core/sample indices :seed (random/next-long! rnd)))))
+                               (core/sample indices
+                                            :seed (random/next-long! rnd)
+                                            :generator generator))))
       {:reservoir-size reservoir-size
        :insert-count insert-count
        :indices indices
-       :seed (random/next-long! rnd)})))
+       :seed (random/next-long! rnd)
+       :generator generator})))
 
 (defmethod insert ::without-replacement [reservoir val]
   [reservoir val]
-  (let [{:keys [reservoir-size insert-count seed indices]} (meta reservoir)
+  (let [{:keys [reservoir-size insert-count seed generator indices]}
+        (meta reservoir)
         insert-count (inc insert-count)
-        rnd (random/create seed)
+        rnd (random/create :seed seed :generator generator)
         index (random/next-int! rnd insert-count)]
     (with-meta (cond (<= insert-count reservoir-size)
                      (let [reservoir (conj reservoir val)]
@@ -67,7 +77,8 @@
                      :else reservoir)
       {:reservoir-size reservoir-size
        :insert-count insert-count
-       :seed (random/next-long! rnd)})))
+       :seed (random/next-long! rnd)
+       :generator generator})))
 
 (defn sample
   "Returns a reservoir sample (a vector of items) for a collection
@@ -75,7 +86,10 @@
 
    Options:
     :replace - True to sample with replacement, defaults to false.
-    :seed - A seed for the random number generator, defaults to nil."
+    :seed - A seed for the random number generator, defaults to nil.
+    :generator - The random number generator to be used, options
+                 are :lcg (linear congruential) or :twister (Marsenne
+                 twister), default is :lcg."
   [coll reservoir-size & opts]
   (reduce insert (apply create reservoir-size opts)
           coll))

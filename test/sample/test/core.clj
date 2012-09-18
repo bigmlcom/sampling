@@ -27,7 +27,7 @@
          '(16 4 5 4 0 14 8 9 10 14))))
 
 (defn- make-weighted-data [& {:keys [seed]}]
-  (let [rnd (random/create seed)]
+  (let [rnd (random/create :seed seed)]
     (map list (range) (repeatedly #(Math/abs (.nextGaussian rnd))))))
 
 (deftest weighted-regression
