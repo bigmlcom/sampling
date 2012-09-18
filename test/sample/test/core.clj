@@ -36,3 +36,13 @@
        '(7 0 1 9 8 3 6 4 2 5))
     (= (take 10 (core/weighted-sample data :seed :bar :replace true))
        '(7 0 8 0 0 0 0 9 4 9))))
+
+(deftest twister-regression
+  (is (= (take 10 (core/sample (range 20)
+                               :seed 7
+                               :generator :twister))
+         '(5 9 6 3 10 17 12 18 8 2)))
+  (is (= (take 10 (core/sample (range 20) :seed 7
+                               :generator :twister
+                               :replace true))
+         '(5 8 4 0 7 17 9 17 0 6))))
