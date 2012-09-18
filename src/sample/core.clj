@@ -46,7 +46,7 @@
 (defn- make-tree [coll]
   (if (> (count coll) branch-factor)
     (let [branch-size (Math/ceil (/ (count coll) branch-factor))
-          children (map make-tree (partition-all branch-size coll))]
+          children (doall (map make-tree (partition-all branch-size coll)))]
       {:total (reduce + (map :total children))
        :children children})
     {:total (reduce + (map second coll))
