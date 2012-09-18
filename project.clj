@@ -1,4 +1,4 @@
-(defproject sample "1.5.0"
+(defproject sample "1.6.0"
   :description "Random Sampling in Clojure"
   :source-path "src/clj"
   :java-source-path "src/java"
