@@ -68,9 +68,11 @@
 
 (defn roll
   "Roll the number of occurrences for an item given sample size,
-   population size, and an optional seed."
-  [sample-size pop-size & [seed]]
-  (let [rnd (random/create seed)]
+   population size, and either an optional random number generator or
+   instead a seed and generator type."
+  [sample-size pop-size & opts]
+  (let [{:keys [rnd]} opts
+        rnd (or rnd (apply random/create opts))]
     ;; Simulate the occurrences when it becomes numerically difficult
     ;; to compute them directly
     (if (> (/ sample-size (double pop-size)) 50)

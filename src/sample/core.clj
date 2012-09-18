@@ -28,15 +28,18 @@
 
    Options:
     :replace - True to sample with replacement, defaults to false.
-    :seed - A seed for the random number generator, defaults to nil."
+    :seed - A seed for the random number generator, defaults to nil.
+    :generator - The random number generator to be used, options
+                 are :lcg (linear congruential) or :twister (Marsenne
+                 twister), default is :lcg."
   [coll & opts]
   (if-not (vector? coll)
     (apply sample (vec coll) opts)
-    (let [{:keys [seed replace]} opts
+    (let [{:keys [replace]} opts
           sample-fn (if replace
                       with-replacement
                       without-replacement)]
-      (sample-fn coll (random/create seed)))))
+      (sample-fn coll (apply random/create opts)))))
 
 (def ^:private branch-factor 8)
 
@@ -109,11 +112,14 @@
 
    Options:
     :replace - True to sample with replacement, defaults to false.
-    :seed - A seed for the random number generator, defaults to nil."
+    :seed - A seed for the random number generator, defaults to nil.
+    :generator - The random number generator to be used, options
+                 are :lcg (linear congruential) or :twister (Marsenne
+                 twister), default is :lcg."
   [coll & opts]
-  (let [{:keys [seed replace]} opts
-        rnd (random/create seed)
-        coll (random/shuffle! (seq coll) rnd)]
+  (let [rnd (apply random/create opts)
+        coll (random/shuffle! (seq coll) rnd)
+        {:keys [replace]} opts]
     (if replace
       (weighted-with-replacement coll rnd)
       (weighted-without-replacement (make-tree coll) rnd))))

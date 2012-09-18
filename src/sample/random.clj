@@ -5,15 +5,34 @@
 ;; Start date: Jun 21, 2012
 
 (ns sample.random
-  "Fns for creating and using a random number generator. Seeding is
-   optional."
-  (:import (java.util Random)))
+  "Functions for creating and using a random number generator."
+  (:import (cern.jet.random.tdouble.engine MersenneTwister64)
+           (java.util Random)))
 
-(defn ^Random create
-  "Creates a random number generator with an optional seed. Any
-   hashable value is valid as a seed."
-  ([] (create (rand)))
-  ([seed] (Random. (hash (or seed (rand))))))
+(defn- make-mersenne-rng [seed]
+  (let [m (MersenneTwister64. seed)]
+    (proxy [java.util.Random] []
+      (nextInt
+        ([] (.nextInt m))
+        ([i] (int (* i (.nextDouble m)))))
+      (nextDouble [] (.nextDouble m))
+      (nextFloat [] (.nextFloat m)))))
+
+(defn create
+  "Creates a random number generator with an optional seed and
+   generator.
+
+   Options:
+    :seed - Any hashable value, defaults to a random seed.
+    :generator - Either lcg (linear congruential) or twister (Mersenne
+                 twister), defaults to lcg."
+  [& {:keys [seed generator]}]
+  (let [seed (hash (or seed (rand)))
+        generator (or generator :lcg)]
+    (case (keyword generator)
+      :lcg (Random. seed)
+      :twister (make-mersenne-rng seed)
+      (throw (Exception. "Generator must be lcg or twister.")))))
 
 (defn next-double!
   "Returns a double given a random number generator and an optional
