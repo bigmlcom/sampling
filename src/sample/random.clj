@@ -15,22 +15,22 @@
   ([] (create (rand)))
   ([seed] (Random. (hash (or seed (rand))))))
 
+(defn next-double!
+  "Returns a double given a random number generator and an optional
+   range."
+  ([^Random rnd] (.nextDouble rnd))
+  ([rnd range] (* range (next-double! rnd))))
+
 (defn next-long!
   "Returns a new seed given a random number generator."
   ([^Random rnd] (.nextLong rnd))
-  ([^Random rnd ^long range] (long (* range (next-double! rnd)))))
+  ([rnd ^long range] (long (* range (next-double! rnd)))))
 
 (defn next-int!
   "Returns an integer given a random number generator and an optional
   range."
   ([^Random rnd] (.nextInt rnd))
   ([^Random rnd ^long range] (.nextInt rnd range)))
-
-(defn next-double!
-  "Returns a double given a random number generator and an optional
-   range."
-  ([^Random rnd] (.nextDouble rnd))
-  ([^Random rnd range] (* range (next-double! rnd))))
 
 (defn shuffle!
   "Shuffles a collection given a random number generator.  Adapted
