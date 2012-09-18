@@ -17,7 +17,7 @@ user> (ns test
 
 `sample.core` provides simple random sampling.  With this technique
 the original population is kept in memory but the resulting sample set
-is produced as a lazy sequence.
+is a lazy sequence.
 
 By default, sampling is done [without replacement]
 (http://www.ma.utexas.edu/users/parker/sampling/repl.htm). This
@@ -64,6 +64,55 @@ test> (core/sample (range 5) :seed :foo)
 (2 1 3 0 4)
 ```
 
+The underlying random number generator may also be selected with the
+`:generator` parameter.  The two options are `:lcg`
+([linear congruential generator]
+(http://en.wikipedia.org/wiki/Linear_congruential_generator))
+and `:twister`
+([Marsenne twister]
+(http://en.wikipedia.org/wiki/Mersenne_twister)).
+The default is `:lcg`.
+
+```clojure
+test> (core/sample (range 5) :seed 7 :generator :lcg)
+(1 3 2 0 4)
+test> (core/sample (range 5) :seed 7 :generator :twister)
+(1 2 0 3 4)
+```
+
+### Weighted Simple Sampling
+
+`weighted-sample` produces a sequence of samples from a collection of
+tuples.  The first value in the tuple should be the candidate item for
+sampling, the second value should be the item's weight.  As above,
+both `:seed`, `:generator`, and `:replace` are supported.  For example:
+
+```clojure
+test> (take 5 (core/weighted-sample [[:heads 0.5] [:tails 0.5]]
+                                    :replace true
+                                    :seed 123))
+(:heads :heads :tails :heads :tails)
+```
+
+Or equivalently:
+
+```clojure
+test> (take 5 (core/weighted-sample {:heads 0.5 :tails 0.5}
+                                    :replace true
+                                    :seed 123))
+(:tails :heads :heads :heads :tails)
+```
+
+The weights need not sum to 1.
+
+```clojure
+test> (frequencies (take 1000 (core/weighted-sample {:rock 3
+                                                     :paper 2
+                                                     :scissors 1}
+                                                    :replace true)))
+{:rock 509, :paper 304, :scissors 187}
+```
+
 ## Reservoir Sampling
 
 `sample.reservoir` provides functions for [reservoir sampling]
@@ -89,12 +138,24 @@ test> (reservoir/sample (range 10) 5)
 [0 9 2 1 4]
 ```
 
-Both `reservoir/sample` and `reservoir/create` support the `:replace`
-and `:seed` parameters.
+Both `reservoir/sample` and `reservoir/create` support the `:replace`,
+`:seed`, and `:generator` parameters.
 
 ```clojure
 test> (reservoir/sample (range 10) 5 :replace true :seed 3)
 [2 5 3 3 8]
+```
+
+Please note that use of the Mersenne twister for reservoir sampling is
+significantly slower than the linear congruential generator.
+
+```clojure
+test> (time (do (reservoir/sample data 1000 :generator :lcg)
+                nil))
+"Elapsed time: 341.289 msecs"
+test> (time (do (reservoir/sample (range 100000) 1000 :generator :twister)
+                nil))
+"Elapsed time: 1588.964 msecs"
 ```
 
 ## Stream Sampling
@@ -119,7 +180,8 @@ test> (stream/sample (range) 5 10)
 (1 2 4 7 9)
 ```
 
-As elsewhere, `stream/sample` supports `:replace` and `:seed`:
+As elsewhere, `stream/sample` supports `:replace`, `:seed`, and
+`:generator`:
 
 ```clojure
 test> (stream/sample (range) 5 10 :replace true :seed 2)
