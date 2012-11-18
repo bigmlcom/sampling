@@ -33,28 +33,30 @@
       '())))
 
 (defn- create [sample-size pop-size
-               & {:keys [seed generator replace rate out-of-bag]}]
-  (let [state (atom {:sample-size sample-size
-                     :pop-size pop-size
-                     :rnd (random/create :seed seed :generator generator)})
-        dist (when (and replace rate)
-               (rate-distribution sample-size pop-size))]
-    (fn [val]
-      (let [{:keys [sample-size pop-size rnd]} @state
-            sample (cond (and replace rate)
-                         (with-replacement-rate val dist rnd)
-                         replace
-                         (with-replacement val sample-size pop-size rnd)
-                         :else
-                         (without-replacement val sample-size pop-size rnd))]
-        (swap! state merge
-               {:pop-size (if rate pop-size (dec pop-size))
-                :sample-size (if rate
-                               sample-size
-                               (- sample-size (count sample)))})
-        (if (and out-of-bag (pos? pop-size))
-          (if (empty? sample) (list val) '())
-          sample)))))
+               & {:keys [seed generator replace rate out-of-bag weigh]}]
+  (if weigh
+    (throw (Exception. "Weighting not yet supported."))
+    (let [state (atom {:sample-size sample-size
+                       :pop-size pop-size
+                       :rnd (random/create :seed seed :generator generator)})
+          dist (when (and replace rate)
+                 (rate-distribution sample-size pop-size))]
+      (fn [val]
+        (let [{:keys [sample-size pop-size rnd]} @state
+              sample (cond (and replace rate)
+                           (with-replacement-rate val dist rnd)
+                           replace
+                           (with-replacement val sample-size pop-size rnd)
+                           :else
+                           (without-replacement val sample-size pop-size rnd))]
+          (swap! state merge
+                 {:pop-size (if rate pop-size (dec pop-size))
+                  :sample-size (if rate
+                                 sample-size
+                                 (- sample-size (count sample)))})
+          (if (and out-of-bag (pos? pop-size))
+            (if (empty? sample) (list val) '())
+            sample))))))
 
 (defn sample
   "Returns a lazy sequence of samples from the collection.  The size

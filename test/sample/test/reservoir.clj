@@ -15,16 +15,14 @@
   (is (about-eq (reduce + (reservoir/sample (range 1000) 500 :replace true))
                 250000 25000))
   (is (= (reservoir/sample (range 20) 10 :seed 7)
-         (reduce reservoir/insert
-                 (reservoir/create 10 :seed 7)
-                 (range 20))))
+         (into (reservoir/create 10 :seed 7)
+               (range 20))))
   (is (= (reservoir/sample (range 20) 10 :seed 7 :replace true)
-         (reduce reservoir/insert
-                 (reservoir/create 10 :seed 7 :replace true)
-                 (range 20)))))
+         (into (reservoir/create 10 :seed 7 :replace true)
+               (range 20)))))
 
 (deftest regression
-  (is (= (reservoir/sample (range 20) 10 :seed 7)
+  (is (= (vec (reservoir/sample (range 20) 10 :seed 7))
          [9 16 11 2 8 19 17 6 15 10]))
-  (is (= (reservoir/sample (range 20) 10 :seed 7 :replace true)
+  (is (= (vec (reservoir/sample (range 20) 10 :seed 7 :replace true))
          [13 10 9 16 7 2 15 17 4 14])))
