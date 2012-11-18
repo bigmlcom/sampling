@@ -81,7 +81,7 @@
                     (swap! r next)
                     i))
         (hasNext [_] (boolean (seq @r))))))
-  (toArray [_] (to-array (mapcat seq reservoir)))
+  (toArray [_] (to-array reservoir))
   clojure.lang.IObj
   (meta [_] mdata)
   (withMeta [_ mdata] (Reservoir. reservoir mdata)))

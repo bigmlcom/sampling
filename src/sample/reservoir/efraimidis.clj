@@ -45,13 +45,13 @@
                   reservoir (conj reservoir {:item i :k k})
                   r (random/next-double! rnd)
                   x (calc-x reservoir r)
-                  seed (random/next-double! rnd)]
+                  seed (random/next-long! rnd)]
               (Reservoir. reservoir res-size seed gen weigh r 0 x mdata))
             (< reservoir-count res-size)
             (let [rnd (random/create :seed seed :generator gen)
                   k (calc-k i (random/next-double! rnd) weigh)
                   reservoir (conj reservoir {:item i :k k})
-                  seed (random/next-double! rnd)]
+                  seed (random/next-long! rnd)]
               (Reservoir. reservoir res-size seed gen weigh nil 0 0 mdata))
             (> next-wt jmp)
             (let [rnd (random/create :seed seed :generator gen)
@@ -66,7 +66,7 @@
                   reservoir (conj (next reservoir) {:item i :k k})
                   r (random/next-double! rnd)
                   x (calc-x reservoir r)
-                  seed (random/next-double! rnd)]
+                  seed (random/next-long! rnd)]
               (Reservoir. reservoir res-size seed gen weigh r 0 x mdata))
             :else
             (Reservoir. reservoir res-size seed gen weigh r next-wt jmp mdata))))
