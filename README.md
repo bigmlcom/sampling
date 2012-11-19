@@ -130,7 +130,7 @@ test> (into (reservoir/create 3) (range 10))
 To see how the reservoir changes as items are added, we can use
 `reductions`:
 
-```
+```clojure
 test> (reductions conj (reservoir/create 3) (range 10))
 (() (0) (0 1) (0 1 2) (0 3 2) (0 3 2) (5 3 2) (6 3 2) (6 3 2) (6 3 2) (6 9 2))
 ```
