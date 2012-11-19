@@ -5,13 +5,15 @@
 ;; Start date: Nov 18, 2012
 
 (ns sample.reservoir.insertion
-  "Provides random sampling using reservoirs."
+  "Provides random sampling using reservoirs.  Uses an insertion
+   method that might originally be from Chao's 'A general purpose
+   unequal probability sampling plan'.  It's behind a paywall,
+   however, so that remains a mystery to me."
   (:require (sample [core :as core]
                     [random :as random]
                     [occurrence :as occurrence])))
 
 (defmulti ^:private insert
-  "Inserts a value into the sample reservoir (a vector of items)."
   (fn [reservoir _]
     (if (:indices (meta reservoir))
       ::with-replacement

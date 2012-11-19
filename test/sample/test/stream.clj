@@ -17,7 +17,7 @@
   (is (about-eq (reduce + (stream/sample (range 1000) 500 1000
                                          :replace true
                                          :rate true))
-                250000 35000)))
+                250000 40000)))
 
 (deftest regression
   (is (= (stream/sample (range) 10 20 :seed 7)

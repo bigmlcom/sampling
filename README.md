@@ -82,35 +82,25 @@ test> (core/sample (range 5) :seed 7 :generator :twister)
 
 ### Weighted Simple Sampling
 
-`weighted-sample` produces a sequence of samples from a collection of
-tuples.  The first value in the tuple should be the candidate item for
-sampling, the second value should be the item's weight.  As above,
-both `:seed`, `:generator`, and `:replace` are supported.  For example:
+Weighted samples can by using the `weigh` parameter.  If the parameter
+is supplied with a function that takes an item and produces a
+non-negative weight, then the resulting sample will be weighted
+accordingly.
 
 ```clojure
-test> (take 5 (core/weighted-sample [[:heads 0.5] [:tails 0.5]]
-                                    :replace true
-                                    :seed 123))
-(:heads :heads :tails :heads :tails)
-```
-
-Or equivalently:
-
-```clojure
-test> (take 5 (core/weighted-sample {:heads 0.5 :tails 0.5}
-                                    :replace true
-                                    :seed 123))
+test> (take 5 (core/sample [:heads :tails]
+                           :weigh {:heads 0.5 :tails 0.5}
+                           :replace true))
 (:tails :heads :heads :heads :tails)
 ```
 
 The weights need not sum to 1.
 
 ```clojure
-test> (frequencies (take 1000 (core/weighted-sample {:rock 3
-                                                     :paper 2
-                                                     :scissors 1}
-                                                    :replace true)))
-{:rock 509, :paper 304, :scissors 187}
+test> (frequencies (take 100 (core/sample [:heads :tails]
+                                          :weigh {:heads 2 :tails 1}
+                                          :replace true)))
+{:heads 66, :tails 34}
 ```
 
 ## Reservoir Sampling
@@ -118,45 +108,52 @@ test> (frequencies (take 1000 (core/weighted-sample {:rock 3
 `sample.reservoir` provides functions for [reservoir sampling]
 (http://en.wikipedia.org/wiki/Reservoir_sampling).  This is best when
 the original population is too large to fit into memory or is
-streaming so the overall size is unknown.  The sample reservoir is
-kept in memory as a vector of items.
+streaming so the overall size is unknown.
 
 To create a sample reservoir, use `reservoir/create` and give it the
-number of samples you desire.  Then use `reservoir/insert` to stream
-values through the reservoir.  For example:
+number of samples you desire.  The resulting reservoir acts as a
+collection, so you can simply `conj` values into the reservoir to
+create a sample.  For example:
 
 ```clojure
-test> (reductions reservoir/insert (reservoir/create 3) (range 10))
-([] [0] [0 1] [0 1 2] [0 1 3] [4 1 3] [4 1 3] [4 1 6] [4 1 7] [4 1 7] [4 1 9])
+test> (reduce conj (reservoir/create 3) (range 10))
+(5 7 2)
+```
+
+Similarly, a collection can be fed into the reservoir with `into`:
+
+```clojure
+test> (into (reservoir/create 3) (range 10))
+(7 0 8)
+```
+
+To see how the reservoir changes as items are added, we can use
+`reductions`:
+
+```
+test> (reductions conj (reservoir/create 3) (range 10))
+(() (0) (0 1) (0 1 2) (0 3 2) (0 3 2) (5 3 2) (6 3 2) (6 3 2) (6 3 2) (6 9 2))
 ```
 
 For convenience, `reservoir/sample` accepts a collection and a
-reservoir size and returns the final reduced reservoir:
+reservoir size and returns the final reservoir:
 
 ```clojure
 test> (reservoir/sample (range 10) 5)
-[0 9 2 1 4]
+(0 9 2 1 4)
 ```
 
 Both `reservoir/sample` and `reservoir/create` support the `:replace`,
-`:seed`, and `:generator` parameters.
+`:seed`, `:generator`, and `:weigh` parameters.
 
 ```clojure
-test> (reservoir/sample (range 10) 5 :replace true :seed 3)
-[2 5 3 3 8]
+test> (reservoir/sample (range 10) 5 :replace true :seed 1 :weigh identity)
+(9 7 5 5 8)
 ```
 
-Please note that use of the Mersenne twister for reservoir sampling is
-significantly slower than the linear congruential generator.
-
-```clojure
-test> (time (do (reservoir/sample data 1000 :generator :lcg)
-                nil))
-"Elapsed time: 341.289 msecs"
-test> (time (do (reservoir/sample (range 100000) 1000 :generator :twister)
-                nil))
-"Elapsed time: 1588.964 msecs"
-```
+One caveat is that samples for reservoirs using `:weigh` won't be in a
+random order (with respect to item weights).  So you may need to
+shuffle the results if that's important for you.
 
 ## Stream Sampling
 

@@ -26,3 +26,14 @@
          [9 16 11 2 8 19 17 6 15 10]))
   (is (= (vec (reservoir/sample (range 20) 10 :seed 7 :replace true))
          [13 10 9 16 7 2 15 17 4 14])))
+
+(deftest weighting
+  (let [result (reservoir/sample [:heads :tails] 4000
+                                 :replace true
+                                 :weigh {:heads 3 :tails 1})]
+    (is (about-eq 3000 (:heads (frequencies result)) 100)))
+  (let [result (into (reservoir/create 4000
+                                       :replace true
+                                       :weigh {:heads 3 :tails 1})
+                     [:heads :tails])]
+    (is (about-eq 3000 (:heads (frequencies result)) 100))))
