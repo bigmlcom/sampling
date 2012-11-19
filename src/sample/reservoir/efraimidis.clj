@@ -5,7 +5,7 @@
 ;; Start date: Nov 18, 2012
 
 (ns sample.reservoir.efraimidis
-  "Provides weighed random sampling using reservoirs as described by
+  "Provides weighted random sampling using reservoirs as described by
    Efraimidis and Spirakis.
    http://utopia.duth.gr/~pefraimi/research/data/2007EncOfAlg.pdf"
   (:require (sample [random :as random])
