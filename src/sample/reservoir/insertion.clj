@@ -69,7 +69,9 @@
   (count [_] (count reservoir))
   (seq [_] (seq reservoir))
   (cons [_ i] (Reservoir. (insert reservoir i) mdata))
-  (empty [_] (Reservoir. (apply create (flatten seq (meta reservoir))) mdata))
+  (empty [_] (Reservoir. (with-meta [] (assoc (meta reservoir)
+                                         :insert-count 0))
+                           mdata))
   (equiv [_ i] (and (instance? Reservoir i) (= reservoir (.reservoir i))))
   clojure.lang.ISeq
   (first [_] (first reservoir))
