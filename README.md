@@ -10,7 +10,8 @@ feel free to follow along in the REPL:
 user> (ns test
         (:require (sample [core :as core]
                           [reservoir :as reservoir]
-                          [stream :as stream])))
+                          [stream :as stream])
+                  (sample.test [stream :as stream-test])))
 ```
 
 ## Simple Sampling
@@ -240,6 +241,59 @@ with each item sampled at a probability of `1/1000`:
 ```clojure
 test> (take 10 (stream/sample (range) 1 1000 :rate true))
 (1149 1391 1562 3960 4359 4455 5141 5885 6310 7568 7828)
+```
+
+### Cond-Sample
+
+While stream sampling does not yet support sample weights, the
+`cond-sample` fn can be useful for fine tuned re-sampling.
+
+`cond-sample` accepts a collection followed by pairs of clauses and
+sample definitions.  A clause should be a function that accepts an
+item and returns either true of false.  After each clause should
+follow a sample defition that describes the sampling technique to use
+when the condition is true.
+
+As an example, we'll use the well known [iris dataset]
+(http://en.wikipedia.org/wiki/Iris_flower_data_set):
+```clojure
+test> (first stream-test/iris-data)
+[5.1 3.5 1.4 0.2 "Iris-setosa"]
+```
+
+There are 50 instances of each species:
+```clojure
+test> (frequencies (map last stream-test/iris-data))
+{"Iris-setosa" 50, "Iris-versicolor" 50, "Iris-virginica" 50}
+```
+
+Let's say we want to sample all of `Iris-setosa`, half as many
+`Iris-versicolor`, and none of the `Iris-virginica`.  If you knew the
+population for each class ahead of time, you could use `cond-sample`
+like so:
+
+```clojure
+test> (def new-sample
+         (stream/cond-sample stream-test/iris-data
+                             #(= "Iris-setosa" (last %)) [50 50]
+                             #(= "Iris-versicolor" (last %)) [25 50]
+                             #(= "Iris-virginica" (last %)) [0 50]))
+test> (frequencies (map last new-sample))
+{"Iris-setosa" 50, "Iris-versicolor" 25}
+```
+
+If you did not know the class populations ahead of time, a similar
+sample could be done using `:rate`.  Also, an item that doesn't
+satisfy any condition will be left out of the final sample.  So
+`Iris-virginica` does not need to have it's own clause:
+
+```clojure
+test> (def new-sample
+         (stream/cond-sample stream-test/iris-data
+                             #(= "Iris-setosa" (last %)) [1 1 :rate true]
+                             #(= "Iris-versicolor" (last %)) [1 2 :rate true]))
+test> (frequencies (map last new-sample))
+{"Iris-setosa" 50, "Iris-versicolor" 23}
 ```
 
 ### Multi-Sample

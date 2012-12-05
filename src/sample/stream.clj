@@ -135,3 +135,32 @@
       (reduce #(doall (map reduce reducers %1 %2))
               (map second opts-list)
               (multi-stream coll (map #(drop 2 %) opts-list))))))
+
+(defn- clause-evaluator [clauses]
+  (fn [item]
+    (if-let [sampler (second (first (drop-while #(not ((first %) item))
+                                                clauses)))]
+      (sampler item)
+      (list))))
+
+(defn cond-sample
+  "cond-sample expects a collection followed by pairs of clauses and
+   sample definitions.  A clause should be a function that accepts an
+   item and returns either true of false.  After each clause should
+   follow a sample defition that describes the sampling technique to
+   use when the condition is true.
+
+   The sample definition should be composed of the sample size, the
+   population size, and optionally the ':replace', ':seed',
+   'generator', and ':rate' parameters.  See the documentation for
+   'sample' for more about the parameters.
+
+   Example: (cond-sample (range 100)
+                         #(< % 50) [2 50]
+                         #(>= % 50) [4 50])"
+  [coll & clauses]
+  (if (odd? (count clauses))
+    (throw (Exception. "cond-sample requires sampling options for each clause fn"))
+    (mapcat (clause-evaluator (map (fn [[c s]] [c (apply create s)])
+                                   (partition 2 clauses)))
+            coll)))
