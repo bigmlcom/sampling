@@ -23,8 +23,14 @@
 
 (deftest regression
   (is (= (vec (reservoir/sample (range 20) 10 :seed 7))
-         [9 16 11 2 8 19 17 6 15 10]))
+         [8 0 14 16 13 3 4 18 6 5]))
   (is (= (vec (reservoir/sample (range 20) 10 :seed 7 :replace true))
+         [19 8 11 5 1 10 15 1 0 15]))
+  (is (= (vec (reservoir/sample (range 20) 10 :seed 7
+                                :implementation :insertion))
+         [9 16 11 2 8 19 17 6 15 10]))
+  (is (= (vec (reservoir/sample (range 20) 10 :seed 7 :replace true
+                                :implementation :insertion))
          [13 10 9 16 7 2 15 17 4 14])))
 
 (deftest weighting

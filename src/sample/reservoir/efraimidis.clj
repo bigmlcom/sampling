@@ -76,7 +76,8 @@
   (equiv
     [_ i]
     (and (instance? Reservoir i)
-         (= reservoir (.reservoir i))
+         (= (into [] reservoir)
+            (into [] (.reservoir i)))
          (= res-size (.res-size i))
          (= seed (.seed i))
          (= gen (.gen i))
@@ -118,13 +119,12 @@
                            res-size seed gen weigh mdata))
   (equiv
     [_ i]
-    (if (instance? ReplacementReservoir i)
-      (and (= reservoir (.reservoir i))
-           (= res-size (.res-size i))
-           (= seed (.seed i))
-           (= gen (.gen i))
-           (= weigh (.weigh i)))
-      false))
+    (and (instance? ReplacementReservoir i)
+         (= reservoir (.reservoir i))
+         (= res-size (.res-size i))
+         (= seed (.seed i))
+         (= gen (.gen i))
+         (= weigh (.weigh i))))
   clojure.lang.ISeq
   (first [_] (ffirst reservoir))
   (more [_] (ReplacementReservoir. (rest reservoir) res-size seed gen weigh mdata))

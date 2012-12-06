@@ -101,7 +101,7 @@
                  twister), default is :lcg."
   [size & {:keys [replace seed generator weigh]}]
   (if weigh
-    (throw (Exception. "Weighting not yet supported."))
+    (throw (Exception. "Insertion reservoir does not support weights."))
     (Reservoir. (with-meta [] {:size size
                                :insert-count 0
                                :seed seed
