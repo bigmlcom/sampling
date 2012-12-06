@@ -8,7 +8,8 @@
   "Provides weighted random sampling using reservoirs as described by
    Efraimidis and Spirakis.
    http://utopia.duth.gr/~pefraimi/research/data/2007EncOfAlg.pdf"
-  (:require (sample [random :as random])
+  (:require (sample [random :as random]
+                    [util :as util])
             (clojure.data [finger-tree :as tree])))
 
 (def ^:private compare-k
@@ -74,13 +75,12 @@
                          res-size seed gen weigh nil 0 0 mdata))
   (equiv
     [_ i]
-    (if (instance? Reservoir i)
-      (and (= reservoir (.reservoir i))
-           (= res-size (.res-size i))
-           (= seed (.seed i))
-           (= gen (.gen i))
-           (= weigh (.weigh i)))
-      false))
+    (and (instance? Reservoir i)
+         (= reservoir (.reservoir i))
+         (= res-size (.res-size i))
+         (= seed (.seed i))
+         (= gen (.gen i))
+         (= weigh (.weigh i))))
   clojure.lang.ISeq
   (first [_] (:item (first reservoir)))
   (more [_] (Reservoir. (rest reservoir) res-size seed gen weigh nil 0 0 mdata))
@@ -157,11 +157,12 @@
              item.  When nil, no sampling weights are applied.
              Defaults to nil."
   [size & {:keys [seed replace generator weigh]}]
-  (if replace
-    (ReplacementReservoir. (init-replacement-reservoir size seed generator weigh)
-                           size seed generator weigh nil)
-    (Reservoir. (tree/counted-sorted-set-by compare-k)
-                size seed generator weigh nil 0 0 nil)))
+  (let [weigh (util/validated-weigh weigh)]
+    (if replace
+      (ReplacementReservoir. (init-replacement-reservoir size seed generator weigh)
+                             size seed generator weigh nil)
+      (Reservoir. (tree/counted-sorted-set-by compare-k)
+                  size seed generator weigh nil 0 0 nil))))
 
 (defn sample
   "Returns a reservoir sample for a collection given a reservoir size.

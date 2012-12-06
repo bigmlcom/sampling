@@ -285,7 +285,7 @@ test> (frequencies (map last new-sample))
 If you did not know the class populations ahead of time, a similar
 sample could be done using `:rate`.  Also, an item that doesn't
 satisfy any condition will be left out of the final sample.  So
-`Iris-virginica` does not need to have it's own clause:
+`Iris-virginica` does not need to have its own clause:
 
 ```clojure
 test> (def new-sample

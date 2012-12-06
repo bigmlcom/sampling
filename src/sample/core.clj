@@ -8,7 +8,8 @@
   "Provides simple random sampling. The original population is kept in
    memory but the resulting sample set is produced as a lazy
    sequence."
-  (:require (sample [random :as random])))
+  (:require (sample [random :as random]
+                    [util :as util])))
 
 (defn- with-replacement [coll rnd]
   (when-not (empty? coll)
@@ -96,6 +97,7 @@
   (if-not (vector? coll)
     (apply sample (vec coll) opts)
     (let [{:keys [replace weigh]} opts
+          weigh (util/validated-weigh weigh)
           rnd (apply random/create opts)]
       (cond (and replace weigh)
             (weighted-with-replacement coll weigh rnd)
