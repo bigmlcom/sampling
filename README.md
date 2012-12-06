@@ -268,7 +268,7 @@ test> (take 10 (stream/sample (range) 1 1000 :rate true))
 ### Cond-Sample
 
 While stream sampling does not yet support sample weights, the
-`cond-sample` fn can be useful for fine tuned re-sampling.
+`cond-sample` fn can be useful for fine tuned sampling.
 
 `cond-sample` accepts a collection followed by pairs of clauses and
 sample definitions.  A clause should be a function that accepts an
