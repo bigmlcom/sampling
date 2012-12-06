@@ -156,14 +156,16 @@ One caveat is that samples for reservoirs using `:weigh` won't be in a
 random order (with respect to item weights).  So you may need to
 shuffle the results if that's important for you.
 
+### Reservoir Implementations
+
 Lastly, there are two implementations of reservoir sampling available:
 `:insertion` and `:efraimdis`.  `:efraimdis` is the default and
 generally the better option.  `:insertion` does not support the
 `:weigh` parameter, however it can be faster when sampling from
 small-ish populations.
 
-The the implementation may be selected for either `reservoir/sample`
-or `reservoir/create` using the `:implementation` parameter:
+The implementation may be selected for either `reservoir/sample` or
+`reservoir/create` using the `:implementation` parameter:
 
 ```clojure
 test> (time (count (reservoir/sample (range 10000) 1000
