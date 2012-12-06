@@ -32,10 +32,13 @@
 
 (deftest weighted-regression
   (let [data (take 10 (make-weighted-data :seed :foo))]
-    (= (core/weighted-sample data :seed :bar)
-       '(7 0 1 9 8 3 6 4 2 5))
-    (= (take 10 (core/weighted-sample data :seed :bar :replace true))
-       '(7 0 8 0 0 0 0 9 4 9))))
+    (is (= (map first (core/sample data :seed :bar :weigh second))
+           '(9 0 8 3 1 4 7 6 5 2)))
+    (is (= (take 10 (map first (core/sample data
+                                            :seed :bar
+                                            :weigh second
+                                            :replace true)))
+           '(9 6 9 4 0 8 4 1 3 0)))))
 
 (deftest twister-regression
   (is (= (take 10 (core/sample (range 20)

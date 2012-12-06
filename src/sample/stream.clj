@@ -33,28 +33,30 @@
       '())))
 
 (defn- create [sample-size pop-size
-               & {:keys [seed generator replace rate out-of-bag]}]
-  (let [state (atom {:sample-size sample-size
-                     :pop-size pop-size
-                     :rnd (random/create :seed seed :generator generator)})
-        dist (when (and replace rate)
-               (rate-distribution sample-size pop-size))]
-    (fn [val]
-      (let [{:keys [sample-size pop-size rnd]} @state
-            sample (cond (and replace rate)
-                         (with-replacement-rate val dist rnd)
-                         replace
-                         (with-replacement val sample-size pop-size rnd)
-                         :else
-                         (without-replacement val sample-size pop-size rnd))]
-        (swap! state merge
-               {:pop-size (if rate pop-size (dec pop-size))
-                :sample-size (if rate
-                               sample-size
-                               (- sample-size (count sample)))})
-        (if (and out-of-bag (pos? pop-size))
-          (if (empty? sample) (list val) '())
-          sample)))))
+               & {:keys [seed generator replace rate out-of-bag weigh]}]
+  (if weigh
+    (throw (Exception. "Weighting not yet supported."))
+    (let [state (atom {:sample-size sample-size
+                       :pop-size pop-size
+                       :rnd (random/create :seed seed :generator generator)})
+          dist (when (and replace rate)
+                 (rate-distribution sample-size pop-size))]
+      (fn [val]
+        (let [{:keys [sample-size pop-size rnd]} @state
+              sample (cond (and replace rate)
+                           (with-replacement-rate val dist rnd)
+                           replace
+                           (with-replacement val sample-size pop-size rnd)
+                           :else
+                           (without-replacement val sample-size pop-size rnd))]
+          (swap! state merge
+                 {:pop-size (if rate pop-size (dec pop-size))
+                  :sample-size (if rate
+                                 sample-size
+                                 (- sample-size (count sample)))})
+          (if (and out-of-bag (pos? pop-size))
+            (if (empty? sample) (list val) '())
+            sample))))))
 
 (defn sample
   "Returns a lazy sequence of samples from the collection.  The size
@@ -133,3 +135,32 @@
       (reduce #(doall (map reduce reducers %1 %2))
               (map second opts-list)
               (multi-stream coll (map #(drop 2 %) opts-list))))))
+
+(defn- clause-evaluator [clauses]
+  (fn [item]
+    (if-let [sampler (second (first (drop-while #(not ((first %) item))
+                                                clauses)))]
+      (sampler item)
+      (list))))
+
+(defn cond-sample
+  "cond-sample expects a collection followed by pairs of clauses and
+   sample definitions.  A clause should be a function that accepts an
+   item and returns either true of false.  After each clause should
+   follow a sample defition that describes the sampling technique to
+   use when the condition is true.
+
+   The sample definition should be composed of the sample size, the
+   population size, and optionally the ':replace', ':seed',
+   'generator', and ':rate' parameters.  See the documentation for
+   'sample' for more about the parameters.
+
+   Example: (cond-sample (range 100)
+                         #(< % 50) [2 50]
+                         #(>= % 50) [4 50])"
+  [coll & clauses]
+  (if (odd? (count clauses))
+    (throw (Exception. "cond-sample requires sampling options for each clause fn"))
+    (mapcat (clause-evaluator (map (fn [[c s]] [c (apply create s)])
+                                   (partition 2 clauses)))
+            coll)))
