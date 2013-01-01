@@ -43,3 +43,30 @@
                                        :weigh {:heads 3 :tails 1})
                      [:heads :tails])]
     (is (about-eq 3000 (:heads (frequencies result)) 100))))
+
+(deftest res-merge
+  (is (about-eq (reduce + (reservoir/merge
+                           (reservoir/sample (range 1300) 500)
+                           (reservoir/sample (range 1300 2000) 500)))
+                (reduce + (reservoir/sample (range 2000) 500))
+                75000))
+  (is (about-eq (reduce + (reservoir/merge
+                           (reservoir/sample (range 1300) 500)
+                           (reservoir/sample (range 1300 2000) 500)))
+                (reduce + (reservoir/merge
+                           (reservoir/sample (range 1300) 500
+                                             :implementation :insertion)
+                           (reservoir/sample (range 1300 2000) 500
+                                             :implementation :insertion)))
+                75000))
+  (is (about-eq (reduce + (reservoir/merge
+                           (reservoir/sample (range 1300) 500 :replace true)
+                           (reservoir/sample (range 1300 2000) 500 :replace true)))
+                (reduce + (reservoir/sample (range 2000) 500 :replace true))
+                75000))
+  (is (about-eq (reduce + (reservoir/merge
+                           (reservoir/sample (range 0 5000) 500 :weigh identity)
+                           (reservoir/sample (range 5000 8000) 500 :weigh identity)
+                           (reservoir/sample (range 8000 10000) 500 :weigh identity)))
+                (reduce + (reservoir/sample (range 0 10000) 500 :weigh identity))
+                200000)))

@@ -11,7 +11,8 @@
    however, so that remains a mystery to me."
   (:require (sample [core :as core]
                     [random :as random]
-                    [occurrence :as occurrence])))
+                    [occurrence :as occurrence]))
+  (:import (sample.reservoir.core MergeableReservoir)))
 
 (defmulti ^:private insert
   (fn [reservoir _]
@@ -73,6 +74,21 @@
                                          :insert-count 0))
                            mdata))
   (equiv [_ i] (and (instance? Reservoir i) (= reservoir (.reservoir i))))
+  MergeableReservoir
+  (mergeReservoir [_ i]
+    (let [{:keys [insert-count size seed] :as rmeta} (meta reservoir)
+          weight-items (fn [r]
+                         (let [ic (:insert-count (meta r))]
+                           (map #(list % ic) r)))
+          rsample (core/sample (concat (weight-items reservoir)
+                                       (weight-items (.reservoir i)))
+                               :weigh second
+                               :seed seed)]
+      (Reservoir. (with-meta (vec (take size (map first rsample)))
+                    (assoc rmeta
+                      :insert-count (+ (:insert-count (meta (.reservoir i)))
+                                       insert-count)))
+                  mdata)))
   clojure.lang.ISeq
   (first [_] (first reservoir))
   (more [_] (Reservoir. (rest reservoir) mdata))

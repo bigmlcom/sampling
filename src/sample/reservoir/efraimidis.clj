@@ -10,7 +10,8 @@
    http://utopia.duth.gr/~pefraimi/research/data/2007EncOfAlg.pdf"
   (:require (sample [random :as random]
                     [util :as util])
-            (clojure.data [finger-tree :as tree])))
+            (clojure.data [finger-tree :as tree]))
+  (:import (sample.reservoir.core MergeableReservoir)))
 
 (def ^:private compare-k
   #(compare (:k %1) (:k %2)))
@@ -32,6 +33,9 @@
 (defn- calc-x [reservoir r]
   (/ (Math/log r)
      (Math/log (:k (first reservoir)))))
+
+(defprotocol ^:private CountedSetReservoir
+  (getCountedSet [a]))
 
 (deftype Reservoir [reservoir res-size seed gen weigh r wt jmp mdata]
   clojure.lang.IPersistentCollection
@@ -87,6 +91,16 @@
   (more [_] (Reservoir. (rest reservoir) res-size seed gen weigh nil 0 0 mdata))
   (next [_] (if-let [r (next reservoir)]
               (Reservoir. r res-size seed gen weigh nil 0 0 mdata)))
+  MergeableReservoir
+  (mergeReservoir [_ i]
+    (let [reservoir (into reservoir (.reservoir i))]
+      (Reservoir. (nthnext reservoir (max (- (count reservoir) res-size) 0))
+                  res-size seed gen weigh r
+                  (+ wt (.wt i))
+                  (+ jmp (.jmp i))
+                  mdata)))
+  CountedSetReservoir
+  (getCountedSet [_] reservoir)
   java.util.List
   (iterator [_]
     (let [r (atom reservoir)]
@@ -130,6 +144,12 @@
   (more [_] (ReplacementReservoir. (rest reservoir) res-size seed gen weigh mdata))
   (next [_] (when-let [r (next reservoir)]
               (ReplacementReservoir. r res-size seed gen weigh mdata)))
+  MergeableReservoir
+  (mergeReservoir [_ i]
+    (ReplacementReservoir.
+     (vec (take res-size (sort-by #(:k (first (.getCountedSet %))) >
+                                  (concat reservoir (.reservoir i)))))
+     res-size seed gen weigh mdata))
   java.util.List
   (iterator [_]
     (let [r (atom reservoir)]

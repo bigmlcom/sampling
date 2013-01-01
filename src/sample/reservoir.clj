@@ -9,7 +9,9 @@
    original population can't be kept in memory but the sample set
    can."
   (:require (sample.reservoir [efraimidis :as efraimidis]
-                              [insertion :as insertion])))
+                              [insertion :as insertion]))
+  (:import (sample.reservoir.core MergeableReservoir))
+  (:refer-clojure :exclude [merge]))
 
 (def ^:private implementations
   {:efraimdis efraimidis/create
@@ -56,3 +58,12 @@
                       is :efraimdis."
   [coll size & opts]
   (into (apply create size opts) coll))
+
+(defn merge
+  "Returns a reservoir merging the rest of the reservoirs into the
+   first."
+  [& reservoirs]
+  (if (apply = (map type reservoirs))
+    (reduce #(.mergeReservoir ^MergeableReservoir %1 ^MergeableReservoir %2)
+            reservoirs)
+    (throw (Exception. "Reservoir types must match"))))
