@@ -9,7 +9,7 @@
    method that might originally be from Chao's 'A general purpose
    unequal probability sampling plan'.  It's behind a paywall,
    however, so that remains a mystery to me."
-  (:require (sample [core :as core]
+  (:require (sample [simple :as simple]
                     [random :as random]
                     [occurrence :as occurrence]))
   (:import (sample.reservoir.core MergeableReservoir)))
@@ -34,9 +34,9 @@
                  (reduce #(assoc %1 %2 val)
                          reservoir
                          (take occurrences
-                               (core/sample indices
-                                            :seed (random/next-long! rnd)
-                                            :generator generator))))
+                               (simple/sample indices
+                                              :seed (random/next-long! rnd)
+                                              :generator generator))))
       {:size size
        :insert-count insert-count
        :indices indices
@@ -80,10 +80,10 @@
           weight-items (fn [r]
                          (let [ic (:insert-count (meta r))]
                            (map #(list % ic) r)))
-          rsample (core/sample (concat (weight-items reservoir)
-                                       (weight-items (.reservoir i)))
-                               :weigh second
-                               :seed seed)]
+          rsample (simple/sample (concat (weight-items reservoir)
+                                         (weight-items (.reservoir i)))
+                                 :weigh second
+                                 :seed seed)]
       (Reservoir. (with-meta (vec (take size (map first rsample)))
                     (assoc rmeta
                       :insert-count (+ (:insert-count (meta (.reservoir i)))

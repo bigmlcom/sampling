@@ -4,7 +4,7 @@
 ;; Author: Adam Ashenfelter <ashenfad@bigml.com>
 ;; Start date: Jun 21, 2012
 
-(ns sample.core
+(ns sample.simple
   "Provides simple random sampling. The original population is kept in
    memory but the resulting sample set is produced as a lazy
    sequence."
