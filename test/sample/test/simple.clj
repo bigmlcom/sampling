@@ -1,8 +1,6 @@
-;; Copyright (c) 2012 BigML, Inc
-;; All rights reserved.
-
-;; Author: Adam Ashenfelter <ashenfad@bigml.com>
-;; Start date: Jun 27, 2012
+;; Copyright 2013 BigML
+;; Licensed under the Apache License, Version 2.0
+;; http://www.apache.org/licenses/LICENSE-2.0
 
 (ns sample.test.simple
   (:use clojure.test
