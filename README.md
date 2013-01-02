@@ -177,7 +177,7 @@ test> (reduce + (reservoir/merge
 ```
 
 With `reservoir/merge`, reservoirs may be built in parallel on subsets
-of the population and combined afterword, even if the subsets are of
+of the population and combined afterwords, even if the subsets are of
 varying size.
 
 ### Reservoir Implementations
