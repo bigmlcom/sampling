@@ -1,15 +1,13 @@
-;; Copyright (c) 2012 BigML, Inc
-;; All rights reserved.
+;; Copyright 2013 BigML
+;; Licensed under the Apache License, Version 2.0
+;; http://www.apache.org/licenses/LICENSE-2.0
 
-;; Author: Adam Ashenfelter <ashenfad@bigml.com>
-;; Start date: Jul 2, 2012
-
-(ns sample.occurrence
+(ns bigml.sampling.occurrence
   "Provides functions for computing the number of occurrences to be
    expected for an item in a population when sampled with
    replacement."
   (:import (cern.jet.math.tdouble DoubleArithmetic))
-  (:require (sample [random :as random])))
+  (:require (bigml.sampling [random :as random])))
 
 (def default-probability-cutoff
   "The cumulative-probabilities fn will stop calculating occurrence

@@ -2,13 +2,16 @@
 # Random Sampling in Clojure
 ============================
 
-This library supports three flavors of random sampling: simple
-sampling, reservoir sampling, and stream sampling. As we review each,
-feel free to follow along in the REPL:
+This library supports three flavors of random sampling:
+[simple sampling](#simple-sampling),
+[reservoir sampling](#reservoir-sampling),
+and [stream sampling](#stream-sampling).
+
+As we review each, feel free to follow along in the REPL:
 
 ```clojure
 user> (ns test
-        (:require (sample [core :as core]
+        (:require (sample [simple :as simple]
                           [reservoir :as reservoir]
                           [stream :as stream])
                   (sample.test [stream :as stream-test])))
@@ -16,9 +19,9 @@ user> (ns test
 
 ## Simple Sampling
 
-`sample.core` provides simple random sampling.  With this technique
-the original population is kept in memory but the resulting sample set
-is a lazy sequence.
+`sample.simple` provides simple random sampling.  With this technique
+the original population is kept in memory but the resulting sample is
+a lazy sequence.
 
 By default, sampling is done [without replacement]
 (http://www.ma.utexas.edu/users/parker/sampling/repl.htm). This
@@ -26,42 +29,42 @@ is equivalent to a lazy [Fisher-Yates shuffle]
 (http://en.wikipedia.org/wiki/Fisher%E2%80%93Yates_shuffle).
 
 ```clojure
-test> (core/sample (range 5))
+test> (simple/sample (range 5))
 (2 3 1 0 4)
 ```
 
 Setting `:replace` as true will sample with replacement.  Since there
-is no limit to the number of items that can be sampled with
+is no limit to the number of items that may be sampled with
 replacement from a population, the result will be an infinite length
 list.  So make sure to `take` however many samples you need.
 
 ```clojure
-test> (take 10 (core/sample (range 5) :replace true))
+test> (take 10 (simple/sample (range 5) :replace true))
 (2 3 3 2 4 1 1 1 3 0)
 ```
 
-Each call to `core/sample` will return a new sample order.
+Each call to `simple/sample` will return a new sample order.
 
 ```clojure
-test> (core/sample (range 5))
+test> (simple/sample (range 5))
 (0 2 3 1 4)
-test> (core/sample (range 5))
+test> (simple/sample (range 5))
 (3 1 4 2 0)
 ```
 
 Setting the `:seed` parameter allows the sample order to be recreated.
 
 ```clojure
-test> (core/sample (range 5) :seed 7)
+test> (simple/sample (range 5) :seed 7)
 (1 3 2 0 4)
-test> (core/sample (range 5) :seed 7)
+test> (simple/sample (range 5) :seed 7)
 (1 3 2 0 4)
 ```
 
 Any value that's hashable is valid as a seed:
 
 ```clojure
-test> (core/sample (range 5) :seed :foo)
+test> (simple/sample (range 5) :seed :foo)
 (2 1 3 0 4)
 ```
 
@@ -75,32 +78,32 @@ and `:twister`
 The default is `:lcg`.
 
 ```clojure
-test> (core/sample (range 5) :seed 7 :generator :lcg)
+test> (simple/sample (range 5) :seed 7 :generator :lcg)
 (1 3 2 0 4)
-test> (core/sample (range 5) :seed 7 :generator :twister)
+test> (simple/sample (range 5) :seed 7 :generator :twister)
 (1 2 0 3 4)
 ```
 
 ### Weighted Simple Sampling
 
-Weighted samples can by using the `weigh` parameter.  If the parameter
-is supplied with a function that takes an item and produces a
-non-negative weight, then the resulting sample will be weighted
+A sample may be weighted using the `:weigh` parameter.  If the
+parameter is supplied with a function that takes an item and produces
+a non-negative weight, then the resulting sample will be weighted
 accordingly.
 
 ```clojure
-test> (take 5 (core/sample [:heads :tails]
-                           :weigh {:heads 0.5 :tails 0.5}
-                           :replace true))
+test> (take 5 (simple/sample [:heads :tails]
+                             :weigh {:heads 0.5 :tails 0.5}
+                             :replace true))
 (:tails :heads :heads :heads :tails)
 ```
 
 The weights need not sum to 1.
 
 ```clojure
-test> (frequencies (take 100 (core/sample [:heads :tails]
-                                          :weigh {:heads 2 :tails 1}
-                                          :replace true)))
+test> (frequencies (take 100 (simple/sample [:heads :tails]
+                                            :weigh {:heads 2 :tails 1}
+                                            :replace true)))
 {:heads 66, :tails 34}
 ```
 
@@ -156,16 +159,38 @@ One caveat is that samples for reservoirs using `:weigh` won't be in a
 random order (with respect to item weights).  So you may need to
 shuffle the results if that's important for you.
 
+### Merging Reservoirs
+
+Reservoirs may be merged with `reservoir/merge`. The resulting sample
+will be similar to a single reservoir over the entire population.  For
+example:
+
+```clojure
+test> (reduce + (reservoir/sample (range 0 10000) 500))
+2517627
+
+test> (reduce + (reservoir/merge
+                 (reservoir/sample (range 0 5000) 500)
+                 (reservoir/sample (range 5000 8000) 500)
+                 (reservoir/sample (range 8000 10000) 500)))
+2527384
+```
+
+With `reservoir/merge`, reservoirs may be built in parallel on subsets
+of the population and combined afterwords, even if the subsets are of
+varying size.
+
 ### Reservoir Implementations
 
 Lastly, there are two implementations of reservoir sampling available:
 `:insertion` and `:efraimdis`.  `:efraimdis` is the default and
 generally the better option.  `:insertion` does not support the
 `:weigh` parameter, however it can be faster when sampling from
-small-ish populations or when using with-replacement.
+small-ish populations or when sampling with replacement.
 
-The implementation may be selected for either `reservoir/sample` or
-`reservoir/create` using the `:implementation` parameter:
+The implementation may be selected when calling either
+`reservoir/sample` or `reservoir/create` by using the
+`:implementation` parameter:
 
 ```clojure
 test> (time (count (reservoir/sample (range 10000) 2000
@@ -382,3 +407,9 @@ test> (stream/multi-reduce (range) [+ 0 20 30 :seed 3]
                                    [+ 0 20 30 :seed 4])
 (269 291)
 ```
+
+## License
+
+Copyright (C) 2013 BigML Inc.
+
+Distributed under the Apache License, Version 2.0.

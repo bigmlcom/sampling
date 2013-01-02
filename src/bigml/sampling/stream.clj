@@ -1,15 +1,13 @@
-;; Copyright (c) 2012 BigML, Inc
-;; All rights reserved.
+;; Copyright 2013 BigML
+;; Licensed under the Apache License, Version 2.0
+;; http://www.apache.org/licenses/LICENSE-2.0
 
-;; Author: Adam Ashenfelter <ashenfad@bigml.com>
-;; Start date: Jun 21, 2012
-
-(ns sample.stream
+(ns bigml.sampling.stream
   "Provides streaming sampling.  Neither the input population or the
    resulting sample are kept in memory.  The order of the sample is
    not randomized, but will be in the order of the input population."
-  (:require (sample [random :as random]
-                    [occurrence :as occurrence])))
+  (:require (bigml.sampling [random :as random]
+                            [occurrence :as occurrence])))
 
 (defn- rate-distribution [sample-size pop-size]
   (apply sorted-map

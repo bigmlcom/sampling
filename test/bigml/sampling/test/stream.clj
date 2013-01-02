@@ -1,13 +1,11 @@
-;; Copyright (c) 2012 BigML, Inc
-;; All rights reserved.
+;; Copyright 2013 BigML
+;; Licensed under the Apache License, Version 2.0
+;; http://www.apache.org/licenses/LICENSE-2.0
 
-;; Author: Adam Ashenfelter <ashenfad@bigml.com>
-;; Start date: Jul 30, 2012
-
-(ns sample.test.stream
+(ns bigml.sampling.test.stream
   (:use clojure.test
-        sample.test.util)
-  (:require (sample [stream :as stream])))
+        bigml.sampling.test.util)
+  (:require (bigml.sampling [stream :as stream])))
 
 (deftest sample
   (is (about-eq (reduce + (stream/sample (range 1000) 500 1000))

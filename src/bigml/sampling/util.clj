@@ -1,10 +1,8 @@
-;; Copyright (c) 2012 BigML, Inc
-;; All rights reserved.
+;; Copyright 2013 BigML
+;; Licensed under the Apache License, Version 2.0
+;; http://www.apache.org/licenses/LICENSE-2.0
 
-;; Author: Adam Ashenfelter <ashenfad@bigml.com>
-;; Start date: Dec 5, 2012
-
-(ns sample.util
+(ns bigml.sampling.util
   "Provides utility functions.")
 
 (defn validated-weigh

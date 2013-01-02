@@ -1,10 +1,8 @@
-;; Copyright (c) 2012 BigML, Inc
-;; All rights reserved.
+;; Copyright 2013 BigML
+;; Licensed under the Apache License, Version 2.0
+;; http://www.apache.org/licenses/LICENSE-2.0
 
-;; Author: Adam Ashenfelter <ashenfad@bigml.com>
-;; Start date: Jul 30, 2012
-
-(ns sample.test.util)
+(ns bigml.sampling.test.util)
 
 (defn about-eq
   "Returns true if the absolute value of the difference

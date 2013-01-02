@@ -1,15 +1,13 @@
-;; Copyright (c) 2012 BigML, Inc
-;; All rights reserved.
+;; Copyright 2013 BigML
+;; Licensed under the Apache License, Version 2.0
+;; http://www.apache.org/licenses/LICENSE-2.0
 
-;; Author: Adam Ashenfelter <ashenfad@bigml.com>
-;; Start date: Jun 21, 2012
-
-(ns sample.core
+(ns bigml.sampling.simple
   "Provides simple random sampling. The original population is kept in
    memory but the resulting sample set is produced as a lazy
    sequence."
-  (:require (sample [random :as random]
-                    [util :as util])))
+  (:require (bigml.sampling [random :as random]
+                            [util :as util])))
 
 (defn- with-replacement [coll rnd]
   (when-not (empty? coll)

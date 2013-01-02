@@ -1,17 +1,16 @@
-;; Copyright (c) 2012 BigML, Inc
-;; All rights reserved.
+;; Copyright 2013 BigML
+;; Licensed under the Apache License, Version 2.0
+;; http://www.apache.org/licenses/LICENSE-2.0
 
-;; Author: Adam Ashenfelter <ashenfad@bigml.com>
-;; Start date: Nov 18, 2012
-
-(ns sample.reservoir.insertion
+(ns bigml.sampling.reservoir.insertion
   "Provides random sampling using reservoirs.  Uses an insertion
    method that might originally be from Chao's 'A general purpose
    unequal probability sampling plan'.  It's behind a paywall,
    however, so that remains a mystery to me."
-  (:require (sample [core :as core]
-                    [random :as random]
-                    [occurrence :as occurrence])))
+  (:require (bigml.sampling [simple :as simple]
+                            [random :as random]
+                            [occurrence :as occurrence]))
+  (:import (bigml.sampling.reservoir.mergeable MergeableReservoir)))
 
 (defmulti ^:private insert
   (fn [reservoir _]
@@ -33,9 +32,9 @@
                  (reduce #(assoc %1 %2 val)
                          reservoir
                          (take occurrences
-                               (core/sample indices
-                                            :seed (random/next-long! rnd)
-                                            :generator generator))))
+                               (simple/sample indices
+                                              :seed (random/next-long! rnd)
+                                              :generator generator))))
       {:size size
        :insert-count insert-count
        :indices indices
@@ -73,6 +72,21 @@
                                          :insert-count 0))
                            mdata))
   (equiv [_ i] (and (instance? Reservoir i) (= reservoir (.reservoir i))))
+  MergeableReservoir
+  (mergeReservoir [_ i]
+    (let [{:keys [insert-count size seed] :as rmeta} (meta reservoir)
+          weight-items (fn [r]
+                         (let [ic (:insert-count (meta r))]
+                           (map #(list % ic) r)))
+          rsample (simple/sample (concat (weight-items reservoir)
+                                         (weight-items (.reservoir i)))
+                                 :weigh second
+                                 :seed seed)]
+      (Reservoir. (with-meta (vec (take size (map first rsample)))
+                    (assoc rmeta
+                      :insert-count (+ (:insert-count (meta (.reservoir i)))
+                                       insert-count)))
+                  mdata)))
   clojure.lang.ISeq
   (first [_] (first reservoir))
   (more [_] (Reservoir. (rest reservoir) mdata))

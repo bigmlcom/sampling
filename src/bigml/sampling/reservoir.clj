@@ -1,15 +1,15 @@
-;; Copyright (c) 2012 BigML, Inc
-;; All rights reserved.
+;; Copyright 2013 BigML
+;; Licensed under the Apache License, Version 2.0
+;; http://www.apache.org/licenses/LICENSE-2.0
 
-;; Author: Adam Ashenfelter <ashenfad@bigml.com>
-;; Start date: Jun 22, 2012
-
-(ns sample.reservoir
+(ns bigml.sampling.reservoir
   "Provides random sampling using reservoirs. This is useful when the
    original population can't be kept in memory but the sample set
    can."
-  (:require (sample.reservoir [efraimidis :as efraimidis]
-                              [insertion :as insertion])))
+  (:require (bigml.sampling.reservoir [efraimidis :as efraimidis]
+                                      [insertion :as insertion]))
+  (:import (bigml.sampling.reservoir.mergeable MergeableReservoir))
+  (:refer-clojure :exclude [merge]))
 
 (def ^:private implementations
   {:efraimdis efraimidis/create
@@ -56,3 +56,12 @@
                       is :efraimdis."
   [coll size & opts]
   (into (apply create size opts) coll))
+
+(defn merge
+  "Returns a reservoir merging the rest of the reservoirs into the
+   first."
+  [& reservoirs]
+  (if (apply = (map type reservoirs))
+    (reduce #(.mergeReservoir ^MergeableReservoir %1 ^MergeableReservoir %2)
+            reservoirs)
+    (throw (Exception. "Reservoir types must match"))))

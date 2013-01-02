@@ -1,10 +1,8 @@
-;; Copyright (c) 2012 BigML, Inc
-;; All rights reserved.
+;; Copyright 2013 BigML
+;; Licensed under the Apache License, Version 2.0
+;; http://www.apache.org/licenses/LICENSE-2.0
 
-;; Author: Adam Ashenfelter <ashenfad@bigml.com>
-;; Start date: Jun 21, 2012
-
-(ns sample.random
+(ns bigml.sampling.random
   "Functions for creating and using a random number generator."
   (:import (cern.jet.random.tdouble.engine MersenneTwister64)
            (java.util Random)))
