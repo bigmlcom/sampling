@@ -10,7 +10,7 @@
   (:require (sample [simple :as simple]
                     [random :as random]
                     [occurrence :as occurrence]))
-  (:import (sample.reservoir.core MergeableReservoir)))
+  (:import (sample.reservoir.mergeable MergeableReservoir)))
 
 (defmulti ^:private insert
   (fn [reservoir _]

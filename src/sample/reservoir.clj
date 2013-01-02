@@ -8,7 +8,7 @@
    can."
   (:require (sample.reservoir [efraimidis :as efraimidis]
                               [insertion :as insertion]))
-  (:import (sample.reservoir.core MergeableReservoir))
+  (:import (sample.reservoir.mergeable MergeableReservoir))
   (:refer-clojure :exclude [merge]))
 
 (def ^:private implementations

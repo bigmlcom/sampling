@@ -9,7 +9,7 @@
   (:require (sample [random :as random]
                     [util :as util])
             (clojure.data [finger-tree :as tree]))
-  (:import (sample.reservoir.core MergeableReservoir)))
+  (:import (sample.reservoir.mergeable MergeableReservoir)))
 
 (def ^:private compare-k
   #(compare (:k %1) (:k %2)))

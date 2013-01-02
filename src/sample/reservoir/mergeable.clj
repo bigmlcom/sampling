@@ -2,8 +2,8 @@
 ;; Licensed under the Apache License, Version 2.0
 ;; http://www.apache.org/licenses/LICENSE-2.0
 
-(ns sample.reservoir.core
-  "Provides common code for reservoir implementations.")
+(ns sample.reservoir.mergeable
+  "Provides the definition for mergeable reservoirs.")
 
 (defprotocol MergeableReservoir
   (mergeReservoir [a b]))
