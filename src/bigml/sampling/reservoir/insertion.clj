@@ -2,15 +2,15 @@
 ;; Licensed under the Apache License, Version 2.0
 ;; http://www.apache.org/licenses/LICENSE-2.0
 
-(ns bigml.sample.reservoir.insertion
+(ns bigml.sampling.reservoir.insertion
   "Provides random sampling using reservoirs.  Uses an insertion
    method that might originally be from Chao's 'A general purpose
    unequal probability sampling plan'.  It's behind a paywall,
    however, so that remains a mystery to me."
-  (:require (bigml.sample [simple :as simple]
-                          [random :as random]
-                          [occurrence :as occurrence]))
-  (:import (bigml.sample.reservoir.mergeable MergeableReservoir)))
+  (:require (bigml.sampling [simple :as simple]
+                            [random :as random]
+                            [occurrence :as occurrence]))
+  (:import (bigml.sampling.reservoir.mergeable MergeableReservoir)))
 
 (defmulti ^:private insert
   (fn [reservoir _]

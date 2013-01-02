@@ -2,13 +2,13 @@
 ;; Licensed under the Apache License, Version 2.0
 ;; http://www.apache.org/licenses/LICENSE-2.0
 
-(ns bigml.sample.reservoir
+(ns bigml.sampling.reservoir
   "Provides random sampling using reservoirs. This is useful when the
    original population can't be kept in memory but the sample set
    can."
-  (:require (bigml.sample.reservoir [efraimidis :as efraimidis]
-                                    [insertion :as insertion]))
-  (:import (bigml.sample.reservoir.mergeable MergeableReservoir))
+  (:require (bigml.sampling.reservoir [efraimidis :as efraimidis]
+                                      [insertion :as insertion]))
+  (:import (bigml.sampling.reservoir.mergeable MergeableReservoir))
   (:refer-clojure :exclude [merge]))
 
 (def ^:private implementations

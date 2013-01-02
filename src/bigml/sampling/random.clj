@@ -2,7 +2,7 @@
 ;; Licensed under the Apache License, Version 2.0
 ;; http://www.apache.org/licenses/LICENSE-2.0
 
-(ns bigml.sample.random
+(ns bigml.sampling.random
   "Functions for creating and using a random number generator."
   (:import (cern.jet.random.tdouble.engine MersenneTwister64)
            (java.util Random)))

@@ -2,10 +2,10 @@
 ;; Licensed under the Apache License, Version 2.0
 ;; http://www.apache.org/licenses/LICENSE-2.0
 
-(ns bigml.sample.test.reservoir
+(ns bigml.sampling.test.reservoir
   (:use clojure.test
-        bigml.sample.test.util)
-  (:require (bigml.sample [reservoir :as reservoir])))
+        bigml.sampling.test.util)
+  (:require (bigml.sampling [reservoir :as reservoir])))
 
 (deftest sample
   (is (about-eq (reduce + (reservoir/sample (range 1000) 500))

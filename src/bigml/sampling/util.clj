@@ -2,7 +2,7 @@
 ;; Licensed under the Apache License, Version 2.0
 ;; http://www.apache.org/licenses/LICENSE-2.0
 
-(ns bigml.sample.util
+(ns bigml.sampling.util
   "Provides utility functions.")
 
 (defn validated-weigh
