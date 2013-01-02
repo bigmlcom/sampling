@@ -2,7 +2,7 @@
 ;; Licensed under the Apache License, Version 2.0
 ;; http://www.apache.org/licenses/LICENSE-2.0
 
-(ns sample.test.util)
+(ns bigml.sample.test.util)
 
 (defn about-eq
   "Returns true if the absolute value of the difference

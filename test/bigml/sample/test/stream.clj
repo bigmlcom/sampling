@@ -2,10 +2,10 @@
 ;; Licensed under the Apache License, Version 2.0
 ;; http://www.apache.org/licenses/LICENSE-2.0
 
-(ns sample.test.stream
+(ns bigml.sample.test.stream
   (:use clojure.test
-        sample.test.util)
-  (:require (sample [stream :as stream])))
+        bigml.sample.test.util)
+  (:require (bigml.sample [stream :as stream])))
 
 (deftest sample
   (is (about-eq (reduce + (stream/sample (range 1000) 500 1000))

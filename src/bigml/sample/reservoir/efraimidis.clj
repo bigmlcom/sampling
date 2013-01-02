@@ -2,14 +2,14 @@
 ;; Licensed under the Apache License, Version 2.0
 ;; http://www.apache.org/licenses/LICENSE-2.0
 
-(ns sample.reservoir.efraimidis
+(ns bigml.sample.reservoir.efraimidis
   "Provides weighted random sampling using reservoirs as described by
    Efraimidis and Spirakis.
    http://utopia.duth.gr/~pefraimi/research/data/2007EncOfAlg.pdf"
-  (:require (sample [random :as random]
-                    [util :as util])
+  (:require (bigml.sample [random :as random]
+                          [util :as util])
             (clojure.data [finger-tree :as tree]))
-  (:import (sample.reservoir.mergeable MergeableReservoir)))
+  (:import (bigml.sample.reservoir.mergeable MergeableReservoir)))
 
 (def ^:private compare-k
   #(compare (:k %1) (:k %2)))

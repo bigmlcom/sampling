@@ -2,11 +2,11 @@
 ;; Licensed under the Apache License, Version 2.0
 ;; http://www.apache.org/licenses/LICENSE-2.0
 
-(ns sample.test.simple
+(ns bigml.sample.test.simple
   (:use clojure.test
-        sample.test.util)
-  (:require (sample [simple :as simple]
-                    [random :as random])))
+        bigml.sample.test.util)
+  (:require (bigml.sample [simple :as simple]
+                          [random :as random])))
 
 (deftest sample
   (is (about-eq (reduce + (take 500 (simple/sample (range 1000))))
