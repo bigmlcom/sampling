@@ -11,10 +11,10 @@ As we review each, feel free to follow along in the REPL:
 
 ```clojure
 user> (ns test
-        (:require (sample [simple :as simple]
-                          [reservoir :as reservoir]
-                          [stream :as stream])
-                  (sample.test [stream :as stream-test])))
+        (:require (bigml.sampling [simple :as simple]
+                                  [reservoir :as reservoir]
+                                  [stream :as stream])
+                  (bigml.sampling.test [stream :as stream-test])))
 ```
 
 ## Simple Sampling
