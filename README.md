@@ -2,6 +2,19 @@
 # Random Sampling in Clojure
 ============================
 
+## Installation
+
+`sampling` is available as a Maven artifact from
+[Clojars](http://clojars.org/bigml/sampling).
+
+For [Leiningen](https://github.com/technomancy/leiningen):
+
+```clojure
+[bigml/sampling "2.1.0"]
+```
+
+## Overview
+
 This library supports three flavors of random sampling:
 [simple sampling](#simple-sampling),
 [reservoir sampling](#reservoir-sampling),
