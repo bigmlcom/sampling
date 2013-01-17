@@ -20,6 +20,14 @@ This library supports three flavors of random sampling:
 [reservoir sampling](#reservoir-sampling),
 and [stream sampling](#stream-sampling).
 
+Simple sampling is the best choice if the data is small enough to
+comfortably keep in memory.  If that's not true but the sample you
+want to take is small enough for memory then reservoir sampling is a
+good choice.  If neither the original population or the sample can
+reside in memory then take a look at stream sampling.
+
+![](http://goo.gl/83vVq)
+
 As we review each, feel free to follow along in the REPL:
 
 ```clojure
@@ -123,9 +131,12 @@ test> (frequencies (take 100 (simple/sample [:heads :tails]
 ## Reservoir Sampling
 
 `sample.reservoir` provides functions for [reservoir sampling]
-(http://en.wikipedia.org/wiki/Reservoir_sampling).  This is best when
-the original population is too large to fit into memory or is
-streaming so the overall size is unknown.
+(http://en.wikipedia.org/wiki/Reservoir_sampling).  Reservoir sampling
+keeps the sampled population in memory (the 'reservoir').  However,
+the original population is streamed through the reservoir so it does
+not need to reside in memory.  This makes reservoirs useful when the
+original population is too large to fit into memory or the overall
+size of the population is unknown.
 
 To create a sample reservoir, use `reservoir/create` and give it the
 number of samples you desire.  The resulting reservoir acts as a
