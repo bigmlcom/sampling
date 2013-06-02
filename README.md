@@ -26,7 +26,7 @@ want to take is small enough for memory, then reservoir sampling is a
 good choice.  If neither the original population nor the sample can
 reside in memory, then take a look at stream sampling.
 
-![](https://www.evernote.com/shard/s4/sh/1548d433-f571-4d6c-8c65-52333a44b520/c80baf9b3aa76ab66db908eec0419515/res/6909bd65-75ee-473b-9063-cee029ba37e8/skitch.png)
+![](img/memory.png)
 
 As we review each, feel free to follow along in the REPL:
 
