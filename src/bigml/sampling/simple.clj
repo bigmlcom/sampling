@@ -1,4 +1,4 @@
-;; Copyright 2013 BigML
+;; Copyright 2013, 2014 BigML
 ;; Licensed under the Apache License, Version 2.0
 ;; http://www.apache.org/licenses/LICENSE-2.0
 
@@ -17,9 +17,9 @@
   (when-not (empty? coll)
     (let [index (random/next-int! rnd (count coll))]
       (cons (nth coll index)
-            (lazy-seq (without-replacement
-                       (subvec (assoc coll index (first coll)) 1)
-                       rnd))))))
+            (-> (subvec (assoc coll index (first coll)) 1)
+                (without-replacement rnd)
+                (lazy-seq))))))
 
 (def ^:private branch-factor 8)
 
@@ -70,10 +70,15 @@
       (cons item (lazy-seq (weighted-without-replacement new-tree weigh rnd))))))
 
 (defn- weighted-with-replacement [coll weigh rnd]
-  (let [sm (into (sorted-map)
-                 (next (reductions (fn [[tw] v] [(+ tw (weigh v)) v])
-                                   [0]
-                                   coll)))
+  (let [sm (->> (reductions (fn [[tw pv] v]
+                              (let [w (weigh v)]
+                                (if (zero? w)
+                                  [tw pv]
+                                  [(+ tw w) v])))
+                            [0]
+                            coll)
+                (next)
+                (into (sorted-map)))
         total (first (last sm))]
     (repeatedly
      #(second (first (subseq sm > (random/next-double! rnd total)))))))
