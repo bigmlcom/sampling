@@ -1,4 +1,3 @@
-
 # Random Sampling in Clojure
 ============================
 
@@ -10,7 +9,7 @@
 For [Leiningen](https://github.com/technomancy/leiningen):
 
 ```clojure
-[bigml/sampling "2.1.0"]
+[bigml/sampling "2.1.1"]
 ```
 
 ## Overview
