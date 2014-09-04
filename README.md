@@ -9,7 +9,7 @@
 For [Leiningen](https://github.com/technomancy/leiningen):
 
 ```clojure
-[bigml/sampling "2.1.1"]
+[bigml/sampling "3.0.0"]
 ```
 
 ## Overview
@@ -76,16 +76,16 @@ Setting the `:seed` parameter allows the sample order to be recreated.
 
 ```clojure
 test> (simple/sample (range 5) :seed 7)
-(1 3 2 0 4)
+(2 1 3 4 0)
 test> (simple/sample (range 5) :seed 7)
-(1 3 2 0 4)
+(2 1 3 4 0)
 ```
 
 Any value that's hashable is valid as a seed:
 
 ```clojure
 test> (simple/sample (range 5) :seed :foo)
-(2 1 3 0 4)
+(1 0 3 2 4)
 ```
 
 The underlying random number generator may also be selected with the
@@ -99,9 +99,9 @@ The default is `:lcg`.
 
 ```clojure
 test> (simple/sample (range 5) :seed 7 :generator :lcg)
-(1 3 2 0 4)
+(2 1 3 4 0)
 test> (simple/sample (range 5) :seed 7 :generator :twister)
-(1 2 0 3 4)
+(4 3 0 1 2)
 ```
 
 ### Weighted Simple Sampling
@@ -175,7 +175,7 @@ Both `reservoir/sample` and `reservoir/create` support the `:replace`,
 
 ```clojure
 test> (reservoir/sample (range 10) 5 :replace true :seed 1 :weigh identity)
-(9 7 5 5 8)
+(7 2 4 5 1)
 ```
 
 One caveat is that samples for reservoirs using `:weigh` won't be in a
@@ -255,7 +255,7 @@ As elsewhere, `stream/sample` supports `:replace`, `:seed`, and
 
 ```clojure
 test> (stream/sample (range) 5 10 :replace true :seed 2)
-(2 3 6 7 7)
+(0 0 4 6 7)
 ```
 
 ### Out-of-bag Items
@@ -428,7 +428,7 @@ An example:
 ```clojure
 test> (stream/multi-reduce (range) [+ 0 20 30 :seed 3]
                                    [+ 0 20 30 :seed 4])
-(269 291)
+(273 330)
 ```
 
 ## License

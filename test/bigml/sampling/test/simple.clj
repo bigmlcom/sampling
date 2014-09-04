@@ -3,9 +3,9 @@
 ;; http://www.apache.org/licenses/LICENSE-2.0
 
 (ns bigml.sampling.test.simple
-  (:use clojure.test
-        bigml.sampling.test.util)
-  (:require (bigml.sampling [simple :as simple]
+  (:require [clojure.test :refer :all]
+            [bigml.sampling.test.util :refer :all]
+            (bigml.sampling [simple :as simple]
                             [random :as random])))
 
 (deftest sample
@@ -18,11 +18,11 @@
 
 (deftest regression
   (is (= (take 10 (simple/sample (range 20) :seed :foo))
-         '(7 3 9 6 10 4 2 8 5 13)))
+         '(11 3 15 17 7 8 10 6 18 14)))
   (is (= (take 10 (simple/sample (range 20) :seed 7))
-         '(16 13 17 12 9 4 18 7 14 19)))
+         '(12 1 9 13 18 15 7 0 17 2)))
   (is (= (take 10 (simple/sample (range 20) :seed 7 :replace true))
-         '(16 4 5 4 0 14 8 9 10 14))))
+         '(12 10 13 7 19 15 13 17 1 8))))
 
 (defn- make-weighted-data [& {:keys [seed]}]
   (let [rnd (random/create :seed seed)]
@@ -31,22 +31,22 @@
 (deftest weighted-regression
   (let [data (take 10 (make-weighted-data :seed :foo))]
     (is (= (map first (simple/sample data :seed :bar :weigh second))
-           '(9 0 8 3 1 4 7 6 5 2)))
+           '(2 9 1 4 8 5 7 6 3 0)))
     (is (= (take 10 (map first (simple/sample data
                                             :seed :bar
                                             :weigh second
                                             :replace true)))
-           '(9 6 9 4 0 8 4 1 3 0)))))
+           '(2 1 1 4 8 4 8 1 9 4)))))
 
 (deftest twister-regression
   (is (= (take 10 (simple/sample (range 20)
                                :seed 7
                                :generator :twister))
-         '(5 9 6 3 10 17 12 18 8 2)))
+         '(16 10 15 5 7 18 17 3 8 2)))
   (is (= (take 10 (simple/sample (range 20) :seed 7
                                :generator :twister
                                :replace true))
-         '(5 8 4 0 7 17 9 17 0 6))))
+         '(16 10 14 3 4 18 15 17 1 12))))
 
 (deftest zero-weight
   (is (= {:heads 100}

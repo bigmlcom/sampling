@@ -1,17 +1,17 @@
-;; Copyright 2013 BigML
+;; Copyright 2013, 2014 BigML
 ;; Licensed under the Apache License, Version 2.0
 ;; http://www.apache.org/licenses/LICENSE-2.0
 
 (ns bigml.sampling.test.occurrence
-  (:use clojure.test)
-  (:require (bigml.sampling [occurrence :as occurrence])))
+  (:require [clojure.test :refer :all]
+            (bigml.sampling [occurrence :as occurrence])))
 
 (def big-result
   1498231660179642550080525374062985229379154060073454416056804436265250417504978421344703666672011193783194306251922106632531575096104465752579970958417306283423558722428981480592122380206679550814874547016793880384420005011964284022150602938812288536154567998961655336231440060094535026560416077739589623596000N)
 
 (deftest roll
-  (= 4 (occurrence/roll 50 10 :seed 12345))
-  (= 1 (occurrence/roll 50 10 :seed 654321)))
+  (is (= 7 (occurrence/roll 50 10 :seed 12345)))
+  (is (= 5 (occurrence/roll 50 10 :seed 654321))))
 
 (deftest cumulative-prob
   (is (= (occurrence/cumulative-probabilities 4 2)

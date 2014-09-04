@@ -1,11 +1,11 @@
-;; Copyright 2013 BigML
+;; Copyright 2013, 2014 BigML
 ;; Licensed under the Apache License, Version 2.0
 ;; http://www.apache.org/licenses/LICENSE-2.0
 
 (ns bigml.sampling.test.stream
-  (:use clojure.test
-        bigml.sampling.test.util)
-  (:require (bigml.sampling [stream :as stream])))
+  (:require [clojure.test :refer :all]
+            [bigml.sampling.test.util :refer :all]
+            (bigml.sampling [stream :as stream])))
 
 (deftest sample
   (is (about-eq (reduce + (stream/sample (range 1000) 500 1000))
@@ -19,19 +19,19 @@
 
 (deftest regression
   (is (= (stream/sample (range) 10 20 :seed 7)
-         '(3 4 5 7 10 12 14 15 16 17)))
+         '(1 2 6 7 9 10 12 13 15 19)))
   (is (= (stream/sample (range) 10 20 :seed 7 :out-of-bag true)
-         '(0 1 2 6 8 9 11 13 18 19)))
+         '(0 3 4 5 8 11 14 16 17 18)))
   (is (= (stream/sample (range) 10 20 :seed 7 :replace true)
-         '(0 1 3 4 7 9 11 16 18 19)))
+         '(2 2 8 8 9 11 13 13 15 17)))
   (is (= (stream/sample (range) 10 20 :seed 7 :replace true :out-of-bag true)
-         '(2 5 6 8 10 12 13 14 15 17)))
+         '(0 1 3 4 5 6 7 10 12 14 16 18 19)))
   (is (= (stream/sample (range 20) 10 20 :seed 7 :replace true :rate true)
-         '(0 1 3 4 7 9 9 10 11 16 19)))
+         '(2 2 8 8 9 11 13 13 15 17 18 19 19)))
   (is (= (stream/sample (range 20) 10 20
                         :seed 7 :replace true
                         :rate true :out-of-bag true)
-         '(2 5 6 8 12 13 14 15 17 18)))
+         '(0 1 3 4 5 6 7 10 12 14 16)))
   (let [sum1 (atom 0)
         sum2 (atom 0)]
     (stream/multi-sample (range)

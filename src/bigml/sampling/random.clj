@@ -1,4 +1,4 @@
-;; Copyright 2013 BigML
+;; Copyright 2013, 2014 BigML
 ;; Licensed under the Apache License, Version 2.0
 ;; http://www.apache.org/licenses/LICENSE-2.0
 
@@ -7,7 +7,7 @@
   (:import (cern.jet.random.tdouble.engine MersenneTwister64)
            (java.util Random)))
 
-(defn- make-mersenne-rng [seed]
+(defn- make-mersenne-rng [^long seed]
   (let [m (MersenneTwister64. seed)]
     (proxy [java.util.Random] []
       (nextInt

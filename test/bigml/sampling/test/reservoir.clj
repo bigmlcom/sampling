@@ -1,11 +1,11 @@
-;; Copyright 2013 BigML
+;; Copyright 2013, 2014 BigML
 ;; Licensed under the Apache License, Version 2.0
 ;; http://www.apache.org/licenses/LICENSE-2.0
 
 (ns bigml.sampling.test.reservoir
-  (:use clojure.test
-        bigml.sampling.test.util)
-  (:require (bigml.sampling [reservoir :as reservoir])))
+  (:require [clojure.test :refer :all]
+            [bigml.sampling.test.util :refer :all]
+            (bigml.sampling [reservoir :as reservoir])))
 
 (deftest sample
   (is (about-eq (reduce + (reservoir/sample (range 1000) 500))
@@ -21,15 +21,15 @@
 
 (deftest regression
   (is (= (vec (reservoir/sample (range 20) 10 :seed 7))
-         [8 0 14 16 13 3 4 18 6 5]))
+         [18 14 3 7 12 10 1 2 17 6]))
   (is (= (vec (reservoir/sample (range 20) 10 :seed 7 :replace true))
-         [19 8 11 5 1 10 15 1 0 15]))
+         [3 17 2 14 12 3 3 8 3 14]))
   (is (= (vec (reservoir/sample (range 20) 10 :seed 7
                                 :implementation :insertion))
-         [9 16 11 2 8 19 17 6 15 10]))
+         [11 13 16 10 9 19 17 7 6 14]))
   (is (= (vec (reservoir/sample (range 20) 10 :seed 7 :replace true
                                 :implementation :insertion))
-         [13 10 9 16 7 2 15 17 4 14])))
+         [3 12 17 4 12 11 17 5 5 15])))
 
 (deftest weighting
   (let [result (reservoir/sample [:heads :tails] 4000

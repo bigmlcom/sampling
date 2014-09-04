@@ -1,4 +1,4 @@
-;; Copyright 2013 BigML
+;; Copyright 2013, 2014 BigML
 ;; Licensed under the Apache License, Version 2.0
 ;; http://www.apache.org/licenses/LICENSE-2.0
 
@@ -42,7 +42,6 @@
        :generator generator})))
 
 (defmethod insert ::without-replacement [reservoir val]
-  [reservoir val]
   (let [{:keys [size insert-count seed generator indices]}
         (meta reservoir)
         insert-count (inc insert-count)
@@ -71,10 +70,13 @@
   (empty [_] (Reservoir. (with-meta [] (assoc (meta reservoir)
                                          :insert-count 0))
                            mdata))
-  (equiv [_ i] (and (instance? Reservoir i) (= reservoir (.reservoir i))))
+  (equiv [_ i]
+    (and (instance? Reservoir i)
+         (= reservoir (.reservoir ^Reservoir i))))
   MergeableReservoir
   (mergeReservoir [_ i]
-    (let [{:keys [insert-count size seed] :as rmeta} (meta reservoir)
+    (let [^Reservoir i i
+          {:keys [insert-count size seed] :as rmeta} (meta reservoir)
           weight-items (fn [r]
                          (let [ic (:insert-count (meta r))]
                            (map #(list % ic) r)))

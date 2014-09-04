@@ -79,11 +79,11 @@
     [_ i]
     (and (instance? Reservoir i)
          (= (into [] reservoir)
-            (into [] (.reservoir i)))
-         (= res-size (.res-size i))
-         (= seed (.seed i))
-         (= gen (.gen i))
-         (= weigh (.weigh i))))
+            (into [] (.reservoir ^Reservoir i)))
+         (= res-size (.res-size ^Reservoir i))
+         (= seed (.seed ^Reservoir i))
+         (= gen (.gen ^Reservoir i))
+         (= weigh (.weigh ^Reservoir i))))
   clojure.lang.ISeq
   (first [_] (:item (first reservoir)))
   (more [_] (Reservoir. (rest reservoir) res-size seed gen weigh nil 0 0 mdata))
@@ -91,11 +91,12 @@
               (Reservoir. r res-size seed gen weigh nil 0 0 mdata)))
   MergeableReservoir
   (mergeReservoir [_ i]
-    (let [reservoir (into reservoir (.reservoir i))]
-      (Reservoir. (nthnext reservoir (max (- (count reservoir) res-size) 0))
+    (let [reservoir (into reservoir (.reservoir ^Reservoir i))]
+      (Reservoir. (->> (nthnext reservoir (max (- (count reservoir) res-size) 0))
+                       (into (empty reservoir)))
                   res-size seed gen weigh r
-                  (+ wt (.wt i))
-                  (+ jmp (.jmp i))
+                  (+ wt (.wt ^Reservoir i))
+                  (+ jmp (.jmp ^Reservoir i))
                   mdata)))
   CountedSetReservoir
   (getCountedSet [_] reservoir)
@@ -129,14 +130,13 @@
   (empty [_]
     (ReplacementReservoir. (init-replacement-reservoir res-size seed gen weigh)
                            res-size seed gen weigh mdata))
-  (equiv
-    [_ i]
+  (equiv [_ i]
     (and (instance? ReplacementReservoir i)
-         (= reservoir (.reservoir i))
-         (= res-size (.res-size i))
-         (= seed (.seed i))
-         (= gen (.gen i))
-         (= weigh (.weigh i))))
+         (= reservoir (.reservoir ^ReplacementReservoir i))
+         (= res-size (.res-size ^ReplacementReservoir i))
+         (= seed (.seed ^ReplacementReservoir i))
+         (= gen (.gen ^ReplacementReservoir i))
+         (= weigh (.weigh ^ReplacementReservoir i))))
   clojure.lang.ISeq
   (first [_] (ffirst reservoir))
   (more [_] (ReplacementReservoir. (rest reservoir) res-size seed gen weigh mdata))
@@ -144,10 +144,11 @@
               (ReplacementReservoir. r res-size seed gen weigh mdata)))
   MergeableReservoir
   (mergeReservoir [_ i]
-    (ReplacementReservoir.
-     (vec (take res-size (sort-by #(:k (first (.getCountedSet %))) >
-                                  (concat reservoir (.reservoir i)))))
-     res-size seed gen weigh mdata))
+    (let [r (->> (concat reservoir (.reservoir ^ReplacementReservoir i))
+                 (sort-by #(:k (first (.getCountedSet ^Reservoir %))) >)
+                 (take res-size)
+                 (vec))]
+      (ReplacementReservoir. r res-size seed gen weigh mdata)))
   java.util.List
   (iterator [_]
     (let [r (atom reservoir)]
