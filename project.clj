@@ -1,4 +1,4 @@
-(defproject bigml/sampling "3.0.0"
+(defproject bigml/sampling "3.0"
   :description "Random Sampling in Clojure"
   :url "https://github.com/bigmlcom/sampling"
   :license {:name "Apache License, Version 2.0"

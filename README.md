@@ -8,7 +8,7 @@
 For [Leiningen](https://github.com/technomancy/leiningen):
 
 ```clojure
-[bigml/sampling "3.0.0"]
+[bigml/sampling "3.0"]
 ```
 
 ## Overview
