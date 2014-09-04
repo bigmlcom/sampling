@@ -1,5 +1,4 @@
 # Random Sampling in Clojure
-============================
 
 ## Installation
 
