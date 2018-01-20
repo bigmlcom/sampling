@@ -5,11 +5,7 @@
 `sampling` is available as a Maven artifact from
 [Clojars](http://clojars.org/bigml/sampling).
 
-For [Leiningen](https://github.com/technomancy/leiningen):
-
-```clojure
-[bigml/sampling "3.0"]
-```
+[![Clojars Project](https://img.shields.io/clojars/v/bigml/sampling.svg)](https://clojars.org/bigml/sampling)
 
 ## Overview
 
@@ -432,6 +428,6 @@ test> (stream/multi-reduce (range) [+ 0 20 30 :seed 3]
 
 ## License
 
-Copyright (C) 2013 BigML Inc.
+Copyright (C) 2013-2018 BigML Inc.
 
 Distributed under the Apache License, Version 2.0.
