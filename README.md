@@ -38,10 +38,8 @@ user> (ns test
 the original population is kept in memory but the resulting sample is
 a lazy sequence.
 
-By default, sampling is done [without replacement]
-(http://www.ma.utexas.edu/users/parker/sampling/repl.htm). This
-is equivalent to a lazy [Fisher-Yates shuffle]
-(http://en.wikipedia.org/wiki/Fisher%E2%80%93Yates_shuffle).
+By default, sampling is done [without replacement](http://www.ma.utexas.edu/users/parker/sampling/repl.htm). This
+is equivalent to a lazy [Fisher-Yates shuffle](http://en.wikipedia.org/wiki/Fisher%E2%80%93Yates_shuffle).
 
 ```clojure
 test> (simple/sample (range 5))
@@ -85,11 +83,9 @@ test> (simple/sample (range 5) :seed :foo)
 
 The underlying random number generator may also be selected with the
 `:generator` parameter.  The two options are `:lcg`
-([linear congruential generator]
-(http://en.wikipedia.org/wiki/Linear_congruential_generator))
+([linear congruential generator](http://en.wikipedia.org/wiki/Linear_congruential_generator))
 and `:twister`
-([Marsenne twister]
-(http://en.wikipedia.org/wiki/Mersenne_twister)).
+([Marsenne twister](http://en.wikipedia.org/wiki/Mersenne_twister)).
 The default is `:lcg`.
 
 ```clojure
@@ -124,8 +120,7 @@ test> (frequencies (take 100 (simple/sample [:heads :tails]
 
 ## Reservoir Sampling
 
-`sample.reservoir` provides functions for [reservoir sampling]
-(http://en.wikipedia.org/wiki/Reservoir_sampling).  Reservoir sampling
+`sample.reservoir` provides functions for [reservoir sampling](http://en.wikipedia.org/wiki/Reservoir_sampling).  Reservoir sampling
 keeps the sampled population in memory (the 'reservoir').  However,
 the original population is streamed through the reservoir so it does
 not need to reside in memory.  This makes reservoirs useful when the
@@ -321,8 +316,7 @@ item and returns either true of false.  After each clause should
 follow a sample defition that describes the sampling technique to use
 when the condition is true.
 
-As an example, we'll use the well known [iris dataset]
-(http://en.wikipedia.org/wiki/Iris_flower_data_set):
+As an example, we'll use the well known [iris dataset](http://en.wikipedia.org/wiki/Iris_flower_data_set):
 ```clojure
 test> (first stream-test/iris-data)
 [5.1 3.5 1.4 0.2 "Iris-setosa"]
